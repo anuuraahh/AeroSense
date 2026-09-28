@@ -1106,3 +1106,8 @@ section.hscroll { padding-block: 0; }
 /* leaving the screen: the label goes first, then the dark screen, so the word never overlaps the new page */
 .curtain .curtain-mark { transition: opacity .16s ease; }
 .curtain.out .curtain-mark { opacity: 0; }
+
+/* twinkling stars (see site.js) */
+.twinkles { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+.twinkles i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #f1f2ff; box-shadow: 0 0 6px 1px rgba(190, 198, 255, .55); opacity: .15; animation: twinkle 5s ease-in-out infinite; }
+@keyframes twinkle { 0%, 100% { opacity: .12; transform: scale(.8); } 50% { opacity: .9; transform: scale(1.15); } }
