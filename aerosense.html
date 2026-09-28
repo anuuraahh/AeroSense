@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AeroSense · Team Nostromo</title>
+  <meta name="description" content="AeroSense: a handheld breath-aerosol analyser that captures the droplets in exhaled breath on a disposable electrode and classifies them offline with edge ML. SIH 2026, PS SIH26230.">
+  <meta property="og:title" content="AeroSense · Team Nostromo">
+  <meta property="og:description" content="Drugs don't evaporate; they ride out of the lungs in microscopic droplets. AeroSense is designed to catch them on the spot, for about ₹35–50 per test.">
+  <meta property="og:image" content="img/prototype-phase2.jpg">
+  <meta name="theme-color" content="#0a0b12">
+  <link rel="icon" href="favicon.png">
+  <script>
+    /* runs before paint: decides whether to show the intro loader or the page curtain */
+    (function (d) {
+      var r = d.documentElement; r.classList.add("js");
+      try {
+        if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
+        if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
+      } catch (e) { r.classList.add("intro-seen"); }
+      /* failsafe: never leave text hidden if a script fails to load */
+      setTimeout(function () {
+        if (window.__siteReady) return;
+        r.classList.remove("from-curtain"); r.classList.add("intro-seen");
+        d.querySelectorAll(".kinetic, .split-words").forEach(function (e) { e.classList.add("ready"); });
+      }, 4500);
+    })(document);
+  </script>
+  <link rel="preload" as="image" href="img/moon.webp">
+  <script>
+    /* the moon fades in once its image is decoded, instead of popping in after a page change */
+    (function (r) { var m = new Image(), ok = function () { r.classList.add("moon-ready"); };
+      m.src = "img/moon.webp"; if (m.decode) m.decode().then(ok, ok); else { m.onload = m.onerror = ok; }
+      setTimeout(ok, 2500); })(document.documentElement);
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }
+  </script>
+  <script>
+    /* When the SolidWorks model is exported as GLB, put it in /models and set this path. */
+    window.AEROSENSE_MODEL = null; // e.g. "models/aerosense.glb"
+  </script>
+</head>
+<body>
+<div class="curtain" aria-hidden="true"><span>AeroSense</span></div>
+<script>
+  /* page-transition curtain is in the HTML so it covers the very first frame; label comes from the page we left */
+  try { var cl = sessionStorage.getItem("nostromo-curtain-label"); if (cl) document.currentScript.previousElementSibling.firstChild.textContent = cl; } catch (e) {}
+</script>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand" data-curtain="AeroSense"><img src="img/nostromo-mark.png" alt="">NOSTROMO</a>
+    <div class="nav-links">
+      <a href="#science">Science</a>
+      <a href="#impactor">Impactor</a>
+      <a href="#anatomy">Anatomy</a>
+      <a href="#explore">Explore</a>
+      <a href="#progress">Progress</a>
+      <a href="#plan">Plan</a>
+      <a href="components.html" data-curtain="AeroSense">Components</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">AeroSense · SIH 2026</span>
+      <h1 class="split-words" style="margin-top:20px">Catch what<br><span class="line2">breath carries.</span></h1>
+      <p class="lede" style="margin-top:22px">Most drugs don't evaporate. They leave the lungs inside microscopic droplets of airway fluid. AeroSense is a handheld reader designed to catch those droplets on a disposable test strip, read them electrochemically, and give a <span class="state-normal">Reference</span>, <span class="state-abnormal">Abnormal</span> or <span class="state-inconclusive">Inconclusive</span> result in under a minute, fully offline.</p>
+      <div class="cta">
+        <a class="btn primary" href="#explore">Explore the device <span class="arrow">→</span></a>
+        <a class="btn" href="#impactor">Try the physics</a>
+      </div>
+    </div>
+    <div class="stage hero-stage" data-cursor="drag">
+      <canvas id="hero3d" aria-label="Interactive 3D concept model of the AeroSense reader. Drag to rotate."></canvas>
+      <div class="stage-fallback">Loading 3D model…</div>
+      <span class="stage-tag">concept model · CAD coming soon</span>
+      <span class="stage-hint">⟲ drag to rotate</span>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:44px">
+    <div class="stats">
+      <div class="stat"><div class="num">&lt;45 s</div><div class="lbl">target time to result</div></div>
+      <div class="stat"><div class="num">₹35–50</div><div class="lbl">projected cost per test</div></div>
+      <div class="stat"><div class="num">Offline</div><div class="lbl">ML runs on the device</div></div>
+      <div class="stat"><div class="num">₹7.5K</div><div class="lbl">prototype build budget</div></div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ============ PROBLEM ============ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head" style="max-width:none">
+      <span class="eyebrow">The problem</span>
+      <p class="scrub wide">Confirming drug use today takes a <em>₹40-lakh</em> instrument, a trained chemist and a queue. The decision at the roadside can't wait for that.</p>
+    </div>
+    <p class="mono reveal" style="font-size:12px;color:var(--red);margin:0 0 6px">today</p>
+    <div class="flow reveal">
+      <div class="step bad"><h3>Invasive sample</h3><p>Blood or urine, collected under controlled protocols.</p></div>
+      <div class="step bad"><h3>Lab transport</h3><p>The sample is physically sent to a central facility.</p></div>
+      <div class="step bad"><h3>30+ min analysis</h3><p>Plus the queue, on a ₹40-lakh+ instrument run by trained chemists.</p></div>
+      <div class="step bad"><h3>Delayed result</h3><p>The answer arrives after the decision has already been made.</p></div>
+    </div>
+    <p class="mono reveal" style="font-size:12px;color:var(--signal-ink);margin:36px 0 6px">with AeroSense</p>
+    <div class="flow good reveal">
+      <div class="step"><h3>Blow</h3><p>One steady breath through a sealed disposable cartridge.</p></div>
+      <div class="step"><h3>Capture</h3><p>Aerosol droplets land directly on a test electrode.</p></div>
+      <div class="step"><h3>Read</h3><p>A tiny potentiostat measures the electrochemical response.</p></div>
+      <div class="step"><h3>Triage</h3><p>On-device ML gives a result in seconds, with no lab and no network.</p></div>
+    </div>
+    <p class="note reveal">AeroSense is designed as a <b>presumptive triage</b> tool. It flags who needs a confirmatory lab test and doesn't replace one.</p>
+  </div>
+</section>
+
+<!-- ============ SCIENCE ============ -->
+<section id="science" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The science</span>
+      <h2 class="split-words">Why we catch droplets instead of sniffing gas.</h2>
+      <p class="lede">Alcohol is volatile, so it evaporates into breath as a gas and a sensor can "smell" it. Drugs like THC, opioids and amphetamines are heavy, non-volatile molecules. They don't become gas. They leave the body a different way.</p>
+    </div>
+    <div class="giant-rows">
+      <div class="giant-row reveal"><div class="g">No gas</div><div><h3>Drugs aren't volatile</h3><p>THC, opioids and amphetamines are heavy molecules. Unlike alcohol, they don't evaporate into breath, so a gas sensor can't smell them.</p></div></div>
+      <div class="giant-row reveal"><div class="g">0.5–5<small>µm</small></div><div><h3>They ride out in droplets</h3><p>The fluid lining the deep airways exchanges compounds with the blood, then breaks into microscopic droplets with every breath.</p></div></div>
+      <div class="giant-row reveal"><div class="g">0<small>needles</small></div><div><h3>A sample without a needle</h3><p>Catch those droplets and you have a non-invasive sample of what's circulating. Prof. Olof Beck's research has shown drugs are present in this aerosol after use.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IMPACTOR SIM ============ -->
+<section id="impactor">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Inertial impaction · live simulation</span>
+      <h2 class="split-words">Let physics sort the breath.</h2>
+      <p class="lede">A nozzle speeds the breath up and points it at the test strip. Gas turns sharply and escapes, but heavier droplets can't turn in time, so they hit the strip. Move the sliders to see which droplet sizes get caught.</p>
+    </div>
+    <div class="sim reveal">
+      <div class="sim-left">
+        <div class="sim-canvas">
+          <canvas id="sim" aria-label="Simulation of breath droplets passing through a nozzle and impacting on an electrode strip"></canvas>
+        </div>
+        <p class="note" style="margin:12px 0 0">Simplified 2D model using the Stokes number (droplet inertia vs. flow). Real designs are tuned with CFD and bench tests.</p>
+      </div>
+      <div class="sim-panel card">
+        <div class="ctrl">
+          <label for="sim-speed">Jet speed <output id="sim-speed-o">15 m/s</output></label>
+          <input id="sim-speed" type="range" min="2" max="30" step="1" value="15">
+        </div>
+        <div class="ctrl">
+          <label for="sim-width">Nozzle width <output id="sim-width-o">0.6 mm</output></label>
+          <input id="sim-width" type="range" min="0.3" max="1.5" step="0.1" value="0.6">
+        </div>
+        <div class="kv"><span>Cut-off size (50% caught)</span><b id="sim-d50">≈ 2.8 µm</b></div>
+        <hr class="sim-rule">
+        <span class="mono sim-cap">Droplets caught on the strip</span>
+        <div class="meter"><div class="kv"><span>0.5–1 µm</span><b id="sim-v0">—</b></div><div class="bar"><i id="sim-b0"></i></div></div>
+        <div class="meter"><div class="kv"><span>1–2.5 µm</span><b id="sim-v1">—</b></div><div class="bar"><i id="sim-b1"></i></div></div>
+        <div class="meter"><div class="kv"><span>2.5–5 µm</span><b id="sim-v2">—</b></div><div class="bar"><i id="sim-b2"></i></div></div>
+        <div class="legend"><span style="--c:hsl(226 85% 84%)">small drop</span><span style="--c:hsl(240 95% 62%)">large drop</span><span style="--c:var(--cyan)">gas</span></div>
+      </div>
+    </div>
+
+    <div class="pipeline" style="margin-top:40px">
+      <div class="node reveal"><span class="v">Verify the breath</span><span class="s">A pressure sensor measures flow and exhaled volume, so the sample comes from deep lung, not mouth air.</span></div>
+      <div class="node reveal"><span class="v">Impact</span><span class="s">Droplets land in a small well on the electrode, and gas leaves through the exhaust.</span></div>
+      <div class="node reveal"><span class="v">Rehydrate</span><span class="s">About 30 µL of buffer is released over the well, in a 37 °C chamber.</span></div>
+      <div class="node reveal"><span class="v">Sweep</span><span class="s">The potentiostat runs a voltammetry scan and records a current-vs-voltage curve.</span></div>
+      <div class="node reveal"><span class="v">Classify</span><span class="s">A compact ML model compares the whole curve with a reference, on the device.</span></div>
+      <div class="node reveal"><span class="v">Report</span><span class="s">A traffic-light result, with an optional timestamped sync when a network is available.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANATOMY (scroll story) ============ -->
+<section id="anatomy" class="band" style="padding-bottom:0">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Anatomy</span>
+      <h2 class="split-words">Take it apart, one layer at a time.</h2>
+      <p class="lede">Keep scrolling. The model follows along.</p>
+    </div>
+  </div>
+  <div class="story">
+    <div class="wrap story-grid">
+      <div class="story-steps">
+        <div class="story-step"><div class="card"><span class="k">01 · the reader</span><h3>One hand, one breath.</h3><p>A palm-sized reader with a screen and three result lights. Everything that touches the sample lives in the cartridge on top.</p></div></div>
+        <div class="story-step"><div class="card"><span class="k">02 · the cartridge</span><h3>Single-use, zero carryover.</h3><p>Mouthpiece, impactor nozzle, buffer blister and electrode strip come as one sealed cartridge. It clicks in, and it's thrown away after one test.</p></div></div>
+        <div class="story-step"><div class="card"><span class="k">03 · the capture</span><h3>Droplets down, gas out.</h3><p>Breath turns sharply above the strip. <span style="color:var(--signal-ink)">Droplets</span> keep going and land on the electrode; <span style="color:var(--cyan)">gas</span> escapes through the side vents. The chamber is held at 37 °C.</p></div></div>
+        <div class="story-step"><div class="card"><span class="k">04 · the electronics</span><h3>A lab bench on one board.</h3><p>A flow sensor checks the breath, a potentiostat reads the strip, and an ESP32 runs the classifier. An 18650 cell powers a full shift.</p></div></div>
+        <div class="story-step"><div class="card"><span class="k">05 · the answer</span><h3>A result an officer can act on.</h3><p>The curve is compared against a reference on the device itself, and one of three lights comes on. No lab, no network.</p></div></div>
+      </div>
+      <div class="story-sticky">
+        <div class="stage">
+          <canvas id="story3d" aria-label="3D model that separates into its parts as you scroll"></canvas>
+          <div class="stage-fallback">Loading 3D model…</div>
+          <div class="story-progress" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="stage-tag">concept model</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPLORER ============ -->
+<section id="explore">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Explorer</span>
+      <h2 class="split-words">Your turn: open it up and run a test.</h2>
+      <p class="lede">Drag to rotate, pull the slider to separate the parts, and click a number to see what that part does (click it again to go back). Then pick a sample and run a simulated breath test.</p>
+    </div>
+    <div class="explorer">
+      <div class="stage" data-cursor="drag">
+        <canvas id="explore3d" aria-label="Interactive exploded view of the AeroSense reader"></canvas>
+        <div class="stage-fallback">Loading 3D model…</div>
+        <span class="stage-hint">⟲ drag to rotate · click numbers</span>
+      </div>
+      <div class="explorer-panel">
+        <div class="card" style="display:grid;gap:14px">
+          <div class="ctrl">
+            <label for="explode">Separate parts <output>assembled ↔ exploded</output></label>
+            <input id="explode" type="range" min="0" max="100" value="55">
+          </div>
+          <div class="chips" id="part-chips"></div>
+          <div class="part-info" id="part-info"><div class="k">select a part</div><h3 style="margin-top:6px">Eight parts, two halves</h3><p>A reusable reader and a single-use cartridge. Pick a number on the model or a chip above.</p></div>
+          <button class="btn" id="view-reset" type="button" style="justify-self:start">Reset view</button>
+        </div>
+        <div class="card" style="display:grid;gap:12px">
+          <span class="mono" style="font-size:11.5px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase">Simulated breath test</span>
+          <div class="seg" id="sample-seg" role="group" aria-label="Sample">
+            <button type="button" data-s="reference" aria-pressed="true">Clean breath</button>
+            <button type="button" data-s="surrogate" aria-pressed="false">Surrogate marker</button>
+            <button type="button" data-s="weak" aria-pressed="false">Weak exhale</button>
+          </div>
+          <div class="screen" aria-live="polite">
+            <canvas id="t-curve" aria-label="Voltammetry curve"></canvas>
+            <div class="row"><span>state</span><b id="t-state">READY</b></div>
+            <div class="row"><span>data</span><b id="t-data">insert cartridge</b></div>
+            <div class="row"><span>result</span><b id="t-result" class="res">—</b></div>
+          </div>
+          <button class="btn primary" id="run-test" type="button" style="justify-self:start">Run breath test <span class="arrow">→</span></button>
+          <p class="note" style="margin:0">Illustrative only. The curves are schematic, not measured data.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="outcomes grid-3" style="margin-top:28px">
+      <div class="outcome reveal" style="--c:var(--ok)"><span class="led"></span><div><b>REFERENCE</b><br><span>Consistent with the negative baseline.</span></div></div>
+      <div class="outcome reveal" style="--c:var(--red)"><span class="led"></span><div><b>ABNORMAL</b><br><span>Biomarker signal. Refer for a lab test.</span></div></div>
+      <div class="outcome reveal" style="--c:var(--amber)"><span class="led"></span><div><b>INCONCLUSIVE</b><br><span>Too little breath, or low confidence. Retest.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NOVELTY ============ -->
+<section id="novelty" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">What's new</span>
+      <h2 class="split-words">The science exists. Pocket-sized, it doesn't yet.</h2>
+      <p class="lede">Breath-aerosol collectors already exist for research, but samples are sealed and mailed to a lab for mass spectrometry. Companies like Hound Labs have shown breath-based THC testing is commercially viable, with premium hardware. Our aim is to bring capture and analysis together in one low-cost handheld device.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="t">
+        <thead><tr><th>Approach</th><th>Non-volatile drugs</th><th>Result on the spot</th><th>Needs a lab</th><th>Running cost</th></tr></thead>
+        <tbody>
+          <tr><td>Alcohol breathalyser</td><td class="no">No: volatile only</td><td class="yes">Yes</td><td class="yes">No</td><td>Low</td></tr>
+          <tr><td>Blood / urine + GC-MS</td><td class="yes">Yes</td><td class="no">No: hours to days</td><td class="no">Yes</td><td>Very high</td></tr>
+          <tr><td>Breath-aerosol collector + lab MS</td><td class="yes">Yes</td><td class="no">No: mailed to a lab</td><td class="no">Yes</td><td>High</td></tr>
+          <tr class="us"><td><b>AeroSense (target)</b></td><td class="yes">Yes: aerosol capture</td><td class="yes">&lt;45 s, offline</td><td class="yes">No: confirm positives only</td><td>₹35–50 / test</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-4 editorial" style="margin-top:44px">
+      <div class="card reveal"><span class="idx">01</span><h3>Impaction, not filtration</h3><p>Easy to blow through, and the droplets collect exactly where the sensor is.</p></div>
+      <div class="card reveal"><span class="idx">02</span><h3>Flow-verified sampling</h3><p>No result is given until the breath volume shows a deep-lung sample.</p></div>
+      <div class="card reveal"><span class="idx">03</span><h3>Zero carryover</h3><p>Everything that touches the sample is thrown away, so the reader never fouls.</p></div>
+      <div class="card reveal"><span class="idx">04</span><h3>Offline edge AI</h3><p>The whole analysis runs on the device, so it works anywhere.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEMO ============ -->
+<section id="demo">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Demo plan</span>
+      <h2 class="split-words">Proving it safely, without a single controlled substance.</h2>
+      <p class="lede">Testing with real narcotics isn't legal or safe outside authorised forensic labs under the NDPS Act. So our demo proves the full physical and electrochemical pipeline using safe surrogates.</p>
+    </div>
+    <div class="grid-3 editorial">
+      <div class="card reveal"><span class="idx">01</span><h3>Breath-sized mist</h3><p>A medical mesh nebulizer makes a 1–5 µm saline aerosol, the same size range as exhaled breath aerosol.</p></div>
+      <div class="card reveal"><span class="idx">02</span><h3>Visible impaction</h3><p>A dye tracer in the mist shows the droplets landing on the electrode while air leaves through the exhaust.</p></div>
+      <div class="card reveal"><span class="idx">03</span><h3>Measurable shift</h3><p>A clean sample and a surrogate "biomarker" sample produce clearly different curves, and the device classifies each one live.</p></div>
+    </div>
+    <div style="margin-top:clamp(56px,8vw,110px)">
+      <span class="eyebrow">our answer to "did you test real drugs?"</span>
+      <p class="scrub wide" style="margin-top:24px">For real drugs, the capture, measurement and classification stay exactly the same. <em>Only the receptor on the electrode changes</em>, developed and validated with an authorised lab partner.</p>
+    </div>
+    <p class="callout reveal" style="margin-top:28px"><b>What the prototype will prove:</b> aerosol capture, the electrochemical readout, and on-device classification of the signal. <b>What comes later:</b> drug-specific detection limits, which need validated receptors and controlled clinical trials.</p>
+  </div>
+</section>
+
+<!-- ============ PROGRESS ============ -->
+<section id="progress" class="band">
+  <div class="wrap proto-split">
+    <figure class="fig proto reveal">
+      <a class="zoom" href="img/prototype-phase2.jpg" data-cursor="zoom"><div class="frame"><img src="img/prototype-phase2.jpg" alt="Team Nostromo's Phase 2 prototype: a bottle breath chamber wired to an ESP32 breadboard rig with a purge fan and red, yellow and green result LEDs, inside a clear case" loading="lazy"></div></a>
+      <figcaption>Phase 2 prototype · click to enlarge</figcaption>
+    </figure>
+    <div>
+      <div class="section-head" style="margin-bottom:28px">
+        <span class="eyebrow">Where we are</span>
+        <h2 class="split-words">Phase 2, built and in hand.</h2>
+        <p class="lede">Our working prototype runs the full test flow, from breath chamber to controller to result. It's what we took to the doctor and the police station for feedback.</p>
+      </div>
+      <div class="editorial" style="display:grid;gap:26px">
+        <div class="card reveal"><span class="idx">Built</span><h3>End-to-end test flow</h3><p>A breath chamber, an ESP32 controller, a purge fan to clear the chamber between tests, and green, yellow and red result LEDs.</p></div>
+        <div class="card reveal"><span class="idx">Tested</span><h3>Taken to real users</h3><p>We demonstrated it to a pulmonologist and to officers at Kuniyamuthur police station. Their feedback shaped the aerosol-capture design.</p></div>
+        <div class="card reveal"><span class="idx">Next</span><h3>Add aerosol capture</h3><p>The two-week sprint replaces the open chamber with the impactor, cartridge and potentiostat shown above.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VALIDATION ============ -->
+
+<!-- ============ PLAN & BUDGET ============ -->
+<section id="plan" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Build plan</span>
+      <h2 class="split-words">From prototype to handheld.</h2>
+      <p class="lede">Our Phase 2 prototype is built. Next is a two-week sprint to add aerosol capture, using off-the-shelf modules on a clean perfboard inside a 3D-printed body. A custom PCB and moulded housing come later.</p>
+    </div>
+    <div class="timeline-h">
+      <div class="st done reveal" style="--c:var(--signal-ink)"><span class="when">● phase 2 · built</span><h3>Working prototype</h3><p>ESP32 test rig with a breath chamber, purge fan and result LEDs. Shown to clinicians and police.</p></div>
+      <div class="st reveal" style="--c:var(--amber)"><span class="when">◐ next · 2 weeks</span><h3>Aerosol capture build</h3><p>3D-printed impactor, flow check, potentiostat on printed strips, surrogate tests, on-device classifier.</p></div>
+      <div class="st reveal"><span class="when">○ phase 3</span><h3>Real receptors</h3><p>Drug-specific electrode chemistry and detection limits, with an authorised lab partner.</p></div>
+      <div class="st reveal"><span class="when">○ phase 4</span><h3>Field-ready</h3><p>Custom PCB, moulded housing, printed cartridges at scale, pilot trials with police and clinics.</p></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:48px;gap:24px;align-items:start">
+      <div class="reveal">
+        <p class="mono" style="font-size:12px;color:var(--dim);margin:0 0 12px">prototype budget (estimates)</p>
+        <div class="table-wrap">
+          <table class="t" style="min-width:0">
+            <tbody>
+              <tr><td>ESP32 controller (NodeMCU-32S)</td><td class="num">₹400</td></tr>
+              <tr><td>Potentiostat front-end</td><td class="num">₹1,400</td></tr>
+              <tr><td>Screen-printed electrode strips</td><td class="num">₹2,000</td></tr>
+              <tr><td>Differential pressure sensor</td><td class="num">₹850</td></tr>
+              <tr><td>Chamber heater film</td><td class="num">₹250</td></tr>
+              <tr><td>OLED, LEDs, buzzer</td><td class="num">₹450</td></tr>
+              <tr><td>3D-printed impactor & body</td><td class="num">₹600</td></tr>
+              <tr><td>18650 cell, charger, regulator</td><td class="num">₹350</td></tr>
+              <tr><td>Mesh nebulizer (demo)</td><td class="num">₹850</td></tr>
+              <tr><td>Buffer & surrogate reagents</td><td class="num">₹350</td></tr>
+              <tr class="total"><td>Total</td><td class="num">₹7,500</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="reveal">
+        <p class="mono" style="font-size:12px;color:var(--dim);margin:0 0 12px">at scale (projected, 10k units)</p>
+        <div class="card">
+          <div class="cost-bars">
+            <div class="cost-line"><div class="top"><span>GC-MS lab setup</span><b>₹40,00,000+</b></div><div class="track"><div class="fill" style="--w:100%;--c:var(--red)"></div></div></div>
+            <div class="cost-line"><div class="top"><span>AeroSense reader</span><b>₹2,800–3,200</b></div><div class="track"><div class="fill" style="--w:.08%;--c:var(--cyan)"></div></div></div>
+            <div class="cost-line"><div class="top"><span>Cartridge, per test</span><b>₹35–50</b></div><div class="track"><div class="fill" style="--w:.01%;--c:var(--signal)"></div></div></div>
+          </div>
+          <p class="note">Bars are drawn to scale. The reader is a one-time cost, and each test only uses a printed strip, much like a glucose test strip.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:88px">
+      <span class="eyebrow">Stack</span>
+      <h2>What it's built on</h2>
+    </div>
+    <div class="stack editorial reveal">
+      <div class="card"><h3>Hardware</h3><ul>
+        <li><span>ESP32-WROOM-32</span><span>controller</span></li>
+        <li><span>Potentiostat AFE</span><span>3-electrode</span></li>
+        <li><span>Screen-printed electrodes</span><span>disposable</span></li>
+        <li><span>Differential pressure sensor</span><span>flow</span></li>
+        <li><span>3D-printed impactor</span><span>PETG / resin</span></li>
+      </ul></div>
+      <div class="card"><h3>Firmware & ML</h3><ul>
+        <li><span>C++ on FreeRTOS</span><span>state machine</span></li>
+        <li><span>DPV / SWV routines</span><span>voltammetry</span></li>
+        <li><span>Random Forest (locked)</span><span>curve classifier</span></li>
+        <li><span>1D-CNN once data grows</span><span>next</span></li>
+        <li><span>TinyML on the ESP32</span><span>fully offline</span></li>
+      </ul></div>
+      <div class="card"><h3>Connectivity (optional)</h3><ul>
+        <li><span>Wi-Fi / BLE sync</span><span>when available</span></li>
+        <li><span>Timestamped records</span><span>audit trail</span></li>
+        <li><span>IoT companion app</span><span>history + dashboard</span></li>
+      </ul></div>
+    </div>
+    <a class="btn reveal" href="components.html" data-curtain="AeroSense" style="margin-top:28px">Every component, explained <span class="arrow">→</span></a>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="display:grid;gap:24px;justify-items:start">
+    <span class="eyebrow">Team Nostromo</span>
+    <h2 style="max-width:780px">Built by students at SKCET for Smart India Hackathon 2026.</h2>
+    <div class="cta" style="display:flex;flex-wrap:wrap;gap:12px">
+      <a class="btn primary" href="index.html#team">Meet the team <span class="arrow">→</span></a>
+      <a class="btn" href="index.html#contact">Get in touch</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <span>© 2026 Team Nostromo · SKCET</span>
+    <span><a href="index.html">← back to home</a></span>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+<script src="site.js" defer></script>
+<script type="module" src="device3d.js"></script>
+</body>
+</html>

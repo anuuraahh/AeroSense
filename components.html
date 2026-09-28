@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Components · AeroSense · Team Nostromo</title>
+  <meta name="description" content="Every hardware and software component inside AeroSense and what each one does: the cartridge, impactor, electrode, potentiostat, ESP32, a Random Forest classifier running as TinyML on the device, and the IoT companion app.">
+  <meta property="og:title" content="Components · AeroSense">
+  <meta property="og:description" content="What's inside AeroSense, part by part: hardware, firmware, on-device ML and the IoT app.">
+  <meta name="theme-color" content="#0a0b12">
+  <link rel="icon" href="favicon.png">
+  <script>
+    (function (d) {
+      var r = d.documentElement; r.classList.add("js");
+      try {
+        if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
+        if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
+      } catch (e) { r.classList.add("intro-seen"); }
+      setTimeout(function () {
+        if (window.__siteReady) return;
+        r.classList.remove("from-curtain"); r.classList.add("intro-seen");
+        d.querySelectorAll(".kinetic, .split-words").forEach(function (e) { e.classList.add("ready"); });
+      }, 4500);
+    })(document);
+  </script>
+  <link rel="preload" as="image" href="img/moon.webp">
+  <script>
+    /* the moon fades in once its image is decoded, instead of popping in after a page change */
+    (function (r) { var m = new Image(), ok = function () { r.classList.add("moon-ready"); };
+      m.src = "img/moon.webp"; if (m.decode) m.decode().then(ok, ok); else { m.onload = m.onerror = ok; }
+      setTimeout(ok, 2500); })(document.documentElement);
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="curtain" aria-hidden="true"><span>AeroSense</span></div>
+<script>
+  try { var cl = sessionStorage.getItem("nostromo-curtain-label"); if (cl) document.currentScript.previousElementSibling.firstChild.textContent = cl; } catch (e) {}
+</script>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand" data-curtain="AeroSense"><img src="img/nostromo-mark.png" alt="">NOSTROMO</a>
+    <div class="nav-links">
+      <a href="#hardware">Hardware</a>
+      <a href="#flow">Signal path</a>
+      <a href="#software">Software</a>
+      <a href="#ml">ML</a>
+      <a href="#app">IoT app</a>
+      <a href="aerosense.html" data-curtain="AeroSense">AeroSense</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">AeroSense · components</span>
+    <h1 class="split-words" style="margin-top:20px;max-width:14ch">Every part, and <span class="line2">what it does.</span></h1>
+    <p class="lede" style="margin-top:22px">AeroSense is a handheld reader and a throw-away cartridge. This page walks through each part of the hardware and each layer of the software, from the moment someone blows into the mouthpiece to the result on the screen and the record in the app.</p>
+    <div class="parts-index">
+      <a href="#hardware"><b>14</b><span>hardware parts</span></a>
+      <a href="#software"><b>4</b><span>software layers</span></a>
+      <a href="#ml"><b>RF</b><span>locked classifier</span></a>
+      <a href="#app"><b>IoT</b><span>companion app</span></a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HARDWARE ============ -->
+<section id="hardware" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">01 · hardware</span>
+      <h2 class="split-words">What's in the box.</h2>
+      <p class="lede">Grouped by the job each part does. Parts that touch the breath live in the disposable cartridge. Everything else stays in the reader.</p>
+    </div>
+
+    <p class="parts-group reveal"><span>A</span>Sampling: the disposable cartridge</p>
+    <div class="parts reveal">
+      <article class="part"><span class="pn">A1</span><h3>Mouthpiece</h3><span class="role">single-use</span><p>The person blows through it. It bends down into the chamber so the breath goes straight at the nozzle. It's thrown away after each test, so nothing passes between people.</p></article>
+      <article class="part"><span class="pn">A2</span><h3>Micro-impactor nozzle</h3><span class="role">3D-printed</span><p>Narrows and speeds up the breath, then turns it sharply. Gas follows the turn and leaves; the heavier 0.5–5 µm droplets can't turn in time and hit the electrode.</p></article>
+      <article class="part"><span class="pn">A3</span><h3>Screen-printed electrode</h3><span class="role">sensing surface</span><p>A three-electrode strip (working, reference, counter) right under the nozzle. The captured droplets land here and are measured here.</p></article>
+      <article class="part"><span class="pn">A4</span><h3>Buffer blister</h3><span class="role">~30 µL</span><p>A sealed drop of buffer that is released onto the strip after the breath, turning the dried droplets into a liquid sample the electronics can read.</p></article>
+    </div>
+
+    <p class="parts-group reveal"><span>B</span>Conditioning and checks</p>
+    <div class="parts reveal">
+      <article class="part"><span class="pn">B1</span><h3>Differential pressure sensor</h3><span class="role">MPXV7002DP</span><p>Measures breath flow and adds it up into exhaled volume. If the breath isn't deep enough to reach the lower airways, no result is given.</p></article>
+      <article class="part"><span class="pn">B2</span><h3>37 °C chamber heater</h3><span class="role">heater film</span><p>Keeps the capture zone at body temperature so breath moisture doesn't condense unevenly and skew the reading.</p></article>
+    </div>
+
+    <p class="parts-group reveal"><span>C</span>Measurement and control</p>
+    <div class="parts reveal">
+      <article class="part"><span class="pn">C1</span><h3>Potentiostat front-end</h3><span class="role">DAC + op-amps + ADC</span><p>Sweeps a voltage across the strip and measures the tiny currents that come back. That current-vs-voltage curve (a voltammogram) is the raw data the classifier reads.</p></article>
+      <article class="part"><span class="pn">C2</span><h3>ESP32 controller</h3><span class="role">NodeMCU-32S</span><p>The brain. It runs the test sequence, drives the potentiostat, cleans up the curve and runs the ML model on the device. Built-in Wi-Fi and Bluetooth handle syncing.</p></article>
+    </div>
+
+    <p class="parts-group reveal"><span>D</span>Interface</p>
+    <div class="parts reveal">
+      <article class="part"><span class="pn">D1</span><h3>0.96″ OLED display</h3><span class="role">status + result</span><p>Shows each step (ready, blow, analysing), the breath-volume bar, the curve and the final result.</p></article>
+      <article class="part"><span class="pn">D2</span><h3>Result LEDs</h3><span class="role">red · amber · green</span><p>Abnormal, inconclusive and normal. Readable at a glance, with no training.</p></article>
+      <article class="part"><span class="pn">D3</span><h3>Start button + buzzer</h3><span class="role">one-button flow</span><p>One press starts a test. The buzzer confirms each step so the officer doesn't have to watch the screen.</p></article>
+    </div>
+
+    <p class="parts-group reveal"><span>E</span>Power</p>
+    <div class="parts reveal">
+      <article class="part"><span class="pn">E1</span><h3>18650 Li-ion cell</h3><span class="role">rechargeable</span><p>Sized to last a full shift of roadside or clinic testing.</p></article>
+      <article class="part"><span class="pn">E2</span><h3>TP4056 charger + regulator</h3><span class="role">USB-C</span><p>Charges the cell safely over USB-C and gives the electronics a steady supply, so readings don't drift as the battery drains.</p></article>
+      <article class="part"><span class="pn">E3</span><h3>Mesh nebulizer</h3><span class="role">demo only</span><p>Makes a fine saline aerosol with safe surrogate compounds, so we can test the whole pipeline without any controlled substance.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIGNAL PATH ============ -->
+<section id="flow">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">02 · signal path</span>
+      <h2 class="split-words">From one breath to one answer.</h2>
+    </div>
+    <div class="flow good reveal">
+      <div class="step"><h3>Flow check</h3><p>The pressure sensor confirms a deep, steady breath.</p></div>
+      <div class="step"><h3>Impaction</h3><p>Droplets hit the electrode; gas leaves through the vents.</p></div>
+      <div class="step"><h3>Voltammetry</h3><p>The potentiostat sweeps the strip and records a curve.</p></div>
+      <div class="step"><h3>Classify</h3><p>The on-device model reads the curve and shows a result.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOFTWARE ============ -->
+<section id="software" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · software</span>
+      <h2 class="split-words">Four layers, all running on the device.</h2>
+      <p class="lede">Only the last layer needs a network, and the device doesn't need it to give a result.</p>
+    </div>
+    <div class="layers">
+      <article class="layer reveal"><span class="pn">L1</span><div><h3>Firmware</h3><p>C++ on FreeRTOS. A state machine runs each test: <span class="mono">READY → BLOW → CAPTURE → MEASURE → ANALYSE → RESULT → PURGE</span>. It won't move on until the step before it has passed, such as enough breath volume.</p></div></article>
+      <article class="layer reveal"><span class="pn">L2</span><div><h3>Measurement routines</h3><p>Differential-pulse and square-wave voltammetry (DPV / SWV) sweeps, run by the ESP32 through the potentiostat, with the chamber held at 37 °C.</p></div></article>
+      <article class="layer reveal"><span class="pn">L3</span><div><h3>Signal processing</h3><p>Baseline correction and smoothing, then feature extraction from the cleaned curve: peak position, peak height, area under the peak, peak width and the slope around it.</p></div></article>
+      <article class="layer reveal"><span class="pn">L4</span><div><h3>On-device ML + sync</h3><p>The classifier turns those features into Normal, Abnormal or Inconclusive. When a network is available, the record is sent to the IoT app.</p></div></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ML ============ -->
+<section id="ml">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">04 · machine learning</span>
+      <h2 class="split-words">Random Forest now. 1D-CNN when the data is ready.</h2>
+    </div>
+
+    <div class="ml-lock reveal">
+      <div class="ml-lock-head">
+        <span class="lock-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Locked for the prototype</span>
+        <h3>Random Forest classifier</h3>
+        <p>Many small decision trees each vote on the curve's features, and the majority wins. The share of trees that agree becomes the confidence score.</p>
+      </div>
+      <div class="why">
+        <div><b>Works with small data</b><p>Early on we'll have tens to a few hundred curves. Random Forests hold up well on small datasets where a deep network would overfit.</p></div>
+        <div><b>Fits the features we have</b><p>Peak position, height and area are exactly the kind of structured features trees handle best, with no scaling or tuning needed.</p></div>
+        <div><b>Tiny and fast</b><p>A trained forest is just a set of if/else comparisons. It compiles to plain C in a few kilobytes and runs on the ESP32 in milliseconds.</p></div>
+        <div><b>Honest confidence</b><p>If the trees don't agree strongly enough, the device shows <span class="state-inconclusive">Inconclusive</span> instead of guessing.</p></div>
+        <div><b>Explainable</b><p>Feature importances show which parts of the curve drove a decision, which matters when a result is questioned.</p></div>
+        <div><b>Robust to noise</b><p>Averaging many trees smooths out one-off noise from a hand-held, field-used sensor.</p></div>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:72px">
+      <h3 class="sub-h">The switch to a 1D-CNN</h3>
+      <p class="lede">A 1D convolutional neural network reads the whole curve point by point instead of a handful of features. It can pick up overlapping peaks and small shoulders that fixed features miss, but it needs far more data to learn from.</p>
+    </div>
+    <ol class="roadmap reveal">
+      <li><span class="when">now</span><h3>Random Forest on curve features</h3><p>Locked. Trained on surrogate curves and runs on the device.</p></li>
+      <li><span class="when">while collecting</span><h3>Keep the raw curves</h3><p>Every test also saves the full resampled curve, so the CNN has training data waiting.</p></li>
+      <li><span class="when">trigger</span><h3>Enough data to switch</h3><p>Thousands of labelled curves across people, days and devices, tested on people the model has never seen.</p></li>
+      <li><span class="when">shadow mode</span><h3>Run both side by side</h3><p>The CNN runs silently next to the forest in the field. It takes over only once it beats the forest on held-out data and fits in memory.</p></li>
+      <li><span class="when">switch</span><h3>1D-CNN becomes primary</h3><p>Pushed to devices as a model update. The forest stays as a fallback.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ TINYML ============ -->
+<section id="tinyml" class="band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">05 · TinyML</span>
+      <h2 class="split-words">Machine learning on a ₹400 chip.</h2>
+      <p class="lede">TinyML means running a trained model on a microcontroller instead of a server. AeroSense gives its result with no network, no cloud and no phone, so the ML has to run on the device itself.</p>
+    </div>
+    <div class="flow good reveal tiny-flow">
+      <div class="step"><h3>Train</h3><p>On a laptop, in Python (scikit-learn for the forest, TensorFlow for the CNN).</p></div>
+      <div class="step"><h3>Shrink</h3><p>The forest is converted to plain C. The CNN is quantised to 8-bit integers, about 4× smaller.</p></div>
+      <div class="step"><h3>Embed</h3><p>The model is compiled into the firmware and flashed to the ESP32 (520 KB RAM, 4 MB flash).</p></div>
+      <div class="step"><h3>Infer</h3><p>Each curve is classified on the chip in milliseconds, fully offline.</p></div>
+    </div>
+    <div class="grid-3 editorial" style="margin-top:36px">
+      <div class="card reveal"><h3>Works anywhere</h3><p>Roadsides, highways and rural checkpoints often have no signal. The result never depends on one.</p></div>
+      <div class="card reveal"><h3>Private by default</h3><p>The breath curve is analysed on the device and never has to leave it to get a result.</p></div>
+      <div class="card reveal"><h3>Low power</h3><p>A few milliseconds of computing per test barely affects the 18650's battery life.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IOT APP ============ -->
+<section id="app">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">06 · IoT app</span>
+      <h2 class="split-words">The device decides. The app keeps the record.</h2>
+      <p class="lede">An IoT companion app connects to readers over Wi-Fi or Bluetooth when a network is available. The device never waits for it. Records are queued on the device and synced later.</p>
+    </div>
+    <div class="app-grid">
+      <div class="app-arch reveal" aria-label="Device to backend to app">
+        <div class="arch-node"><b>AeroSense reader</b><span>ESP32 · on-device result</span></div>
+        <div class="arch-link"><span>Wi-Fi / BLE · HTTPS</span></div>
+        <div class="arch-node"><b>Backend API</b><span>FastAPI · database</span></div>
+        <div class="arch-link"><span>REST + live WebSocket</span></div>
+        <div class="arch-node"><b>Companion app</b><span>Flutter · Android / iOS</span></div>
+      </div>
+      <div class="stack editorial reveal" style="grid-template-columns:1fr">
+        <div class="card"><h3>What the app does</h3><ul>
+          <li><span>Live device status</span><span>battery, step, strip</span></li>
+          <li><span>Test history</span><span>timestamped</span></li>
+          <li><span>Result + confidence + flow check</span><span>per test</span></li>
+          <li><span>Fleet dashboard</span><span>command view</span></li>
+          <li><span>Model updates to devices</span><span>over the air</span></li>
+          <li><span>Audit trail</span><span>for confirmatory tests</span></li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap" style="display:grid;gap:24px;justify-items:start">
+    <span class="eyebrow">See it assembled</span>
+    <h2 style="max-width:780px">Explore these parts on the interactive 3D model.</h2>
+    <div class="cta" style="display:flex;flex-wrap:wrap;gap:12px">
+      <a class="btn primary" href="aerosense.html#explore" data-curtain="AeroSense">Open the explorer <span class="arrow">→</span></a>
+      <a class="btn" href="index.html#team" data-curtain="AeroSense">Meet the team</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <span>© 2026 Team Nostromo · SKCET</span>
+    <span><a href="index.html" data-curtain="AeroSense">← back to home</a></span>
+  </div>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>

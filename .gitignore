@@ -1,0 +1,17 @@
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.vercel/
+node_modules/
+
+# old files the site no longer uses (safe to delete from the folder too)
+intro3d.js
+img/nostromo-mark.svg
+img/enclosure.jpg
+img/nostromo-logo.png
+img/pcb-3d.jpg
+img/pcb-layout.jpg
+img/prototype.jpg
+img/schematic.png

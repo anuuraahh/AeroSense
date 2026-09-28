@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Team Nostromo</title>
+  <meta name="description" content="Team Nostromo — student engineers from SKCET building low-cost hardware + ML. Flagship: AeroSense, a handheld breath-aerosol analyser for drug screening (Smart India Hackathon 2026).">
+  <meta property="og:title" content="Team Nostromo">
+  <meta property="og:description" content="Low-cost hardware + ML from SKCET. Flagship project: AeroSense breath-aerosol analyser (SIH 2026, PS SIH26230).">
+  <meta property="og:image" content="img/prototype-phase2.jpg">
+  <meta name="theme-color" content="#0a0b12">
+  <link rel="icon" href="favicon.png">
+  <script>
+    /* runs before paint: decides whether to show the intro loader or the page curtain */
+    (function (d) {
+      var r = d.documentElement; r.classList.add("js");
+      try {
+        if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
+        if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
+      } catch (e) { r.classList.add("intro-seen"); }
+      /* failsafe: never leave text hidden if a script fails to load */
+      setTimeout(function () {
+        if (window.__siteReady) return;
+        r.classList.remove("from-curtain"); r.classList.add("intro-seen");
+        d.querySelectorAll(".kinetic, .split-words").forEach(function (e) { e.classList.add("ready"); });
+        d.querySelectorAll(".intro").forEach(function (e) { e.classList.add("on"); });
+      }, 4500);
+    })(document);
+  </script>
+  <link rel="preload" as="image" href="img/moon.webp">
+  <script>
+    /* the moon fades in once its image is decoded, instead of popping in after a page change */
+    (function (r) { var m = new Image(), ok = function () { r.classList.add("moon-ready"); };
+      m.src = "img/moon.webp"; if (m.decode) m.decode().then(ok, ok); else { m.onload = m.onerror = ok; }
+      setTimeout(ok, 2500); })(document.documentElement);
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }
+  </script>
+</head>
+<body>
+<div class="curtain" aria-hidden="true"><span>AeroSense</span></div>
+<script>
+  /* page-transition curtain is in the HTML so it covers the very first frame; label comes from the page we left */
+  try { var cl = sessionStorage.getItem("nostromo-curtain-label"); if (cl) document.currentScript.previousElementSibling.firstChild.textContent = cl; } catch (e) {}
+</script>
+
+<div class="loader" aria-hidden="true">
+  <div class="loader-inner">
+    <div class="lung"></div>
+    <div class="loader-word">NOSTROMO</div>
+    <div class="loader-meta"><span>inhaling</span><b data-count>000</b><span>SIH 2026</span></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><img src="img/nostromo-mark.png" alt="">NOSTROMO</a>
+    <div class="nav-links">
+      <a href="#work">work</a>
+      <a href="components.html" data-curtain="AeroSense">components</a>
+      <a href="#field">field</a>
+      <a href="#team">crew</a>
+      <a href="#contact">contact</a>
+    </div>
+  </div>
+</nav>
+
+<div class="intro-scroll">
+<header class="intro" id="top">
+  <div class="moon" aria-hidden="true"></div>
+  <div class="hud" aria-hidden="true">
+    <svg class="hud-corner tl" viewBox="0 0 300 220"><path class="ln" d="M1 220 V58 L58 1 H300"/><path class="tab" d="M8 62 L62 8 H112 L94 26 H56 L26 56 V78 L8 96 Z"/><path class="ln" d="M14 150 l12 -9 M14 163 l12 -9 M14 176 l12 -9"/><g class="dust"><circle cx="42" cy="139" r="1.2"/><circle cx="23" cy="122" r="0.6"/><circle cx="61" cy="55" r="0.8"/><circle cx="3" cy="115" r="0.8"/><circle cx="54" cy="92" r="0.6"/><circle cx="75" cy="56" r="1.0"/><circle cx="52" cy="152" r="1.0"/><circle cx="87" cy="148" r="1.2"/><circle cx="15" cy="119" r="1.2"/><circle cx="22" cy="215" r="1.6"/><circle cx="43" cy="116" r="1.0"/><circle cx="68" cy="81" r="1.2"/><circle cx="11" cy="135" r="1.2"/><circle cx="58" cy="149" r="0.6"/><circle cx="79" cy="142" r="1.0"/><circle cx="33" cy="99" r="0.8"/><circle cx="121" cy="156" r="1.2"/><circle cx="34" cy="157" r="1.6"/><circle cx="18" cy="166" r="1.0"/><circle cx="51" cy="128" r="0.8"/><circle cx="31" cy="172" r="0.8"/><circle cx="107" cy="185" r="1.0"/><circle cx="29" cy="123" r="0.6"/></g></svg>
+    <svg class="hud-corner br" viewBox="0 0 300 220"><path class="ln" d="M1 220 V58 L58 1 H300"/><path class="tab" d="M8 62 L62 8 H112 L94 26 H56 L26 56 V78 L8 96 Z"/><path class="ln" d="M150 16 l-9 12 M163 16 l-9 12 M176 16 l-9 12 M189 16 l-9 12 M202 16 l-9 12"/><g class="dust"><circle cx="119" cy="59" r="1.0"/><circle cx="73" cy="124" r="0.8"/><circle cx="46" cy="79" r="1.6"/><circle cx="33" cy="105" r="1.6"/><circle cx="56" cy="160" r="0.8"/><circle cx="40" cy="174" r="0.8"/><circle cx="37" cy="125" r="0.6"/><circle cx="3" cy="131" r="1.0"/><circle cx="92" cy="119" r="1.2"/><circle cx="82" cy="115" r="0.8"/><circle cx="51" cy="129" r="0.8"/><circle cx="1" cy="89" r="1.6"/><circle cx="75" cy="154" r="1.2"/><circle cx="25" cy="98" r="0.8"/><circle cx="42" cy="161" r="0.6"/><circle cx="48" cy="162" r="1.2"/><circle cx="63" cy="79" r="0.6"/><circle cx="70" cy="127" r="1.6"/><circle cx="48" cy="148" r="1.0"/><circle cx="48" cy="130" r="1.0"/><circle cx="38" cy="73" r="0.6"/></g></svg>
+    <svg class="hud-ticks l" viewBox="0 0 12 70"><rect x="0" y="0" width="10" height="16"/><rect x="0" y="24" width="10" height="16"/><rect x="0" y="48" width="10" height="16"/></svg>
+    <svg class="hud-ticks r" viewBox="0 0 12 90"><path class="ln" d="M6 0 V18" stroke-dasharray="2 3"/><rect x="0" y="26" width="10" height="16"/><rect x="0" y="48" width="10" height="16"/><rect x="0" y="70" width="10" height="16"/></svg>
+    <svg class="hud-cross c1" viewBox="0 0 24 24"><path class="ln" d="M12 0 V24 M0 12 H24"/></svg>
+    <svg class="hud-cross c2" viewBox="0 0 24 24"><path class="ln" d="M12 0 V24 M0 12 H24"/></svg>
+    <svg class="hud-orbit" viewBox="0 0 440 440"><circle class="ln" cx="0" cy="440" r="330"/><circle class="ln" cx="0" cy="440" r="190"/><circle class="dot" cx="233" cy="207" r="4"/><circle class="dot" cx="306" cy="317" r="3"/><circle class="dot" cx="327" cy="398" r="3"/><path class="ln" d="M150 280 V340 M120 310 H180"/><circle class="dot" cx="150" cy="310" r="3"/><g class="dust"><circle cx="90" cy="431" r="1.2"/><circle cx="91" cy="284" r="1.2"/><circle cx="38" cy="329" r="1.2"/><circle cx="86" cy="373" r="1.0"/><circle cx="161" cy="355" r="0.6"/><circle cx="66" cy="325" r="0.6"/><circle cx="133" cy="302" r="1.2"/><circle cx="104" cy="358" r="0.6"/><circle cx="70" cy="420" r="1.6"/><circle cx="85" cy="356" r="1.2"/><circle cx="124" cy="319" r="0.8"/><circle cx="98" cy="298" r="1.2"/><circle cx="125" cy="342" r="0.6"/><circle cx="152" cy="400" r="1.2"/><circle cx="10" cy="360" r="0.8"/><circle cx="88" cy="387" r="1.6"/><circle cx="109" cy="347" r="1.0"/><circle cx="74" cy="354" r="1.6"/><circle cx="15" cy="394" r="1.0"/><circle cx="104" cy="324" r="0.6"/><circle cx="123" cy="325" r="1.2"/><circle cx="153" cy="344" r="1.2"/><circle cx="78" cy="416" r="1.2"/><circle cx="94" cy="338" r="0.6"/><circle cx="58" cy="373" r="1.0"/><circle cx="85" cy="403" r="1.6"/><circle cx="32" cy="383" r="0.8"/><circle cx="11" cy="411" r="0.8"/></g></svg>
+  </div>
+  <div class="showcase">
+    <h2 class="showcase-title"><a href="aerosense.html" data-curtain="AeroSense">AeroSense <em>E-Nose</em></a></h2>
+    <canvas id="showcase3d" aria-label="3D model of the AeroSense reader"></canvas>
+  </div>
+  <div class="wrap intro-word"><h1 class="kinetic mega" data-react>NOSTROMO</h1></div>
+  <p class="corner bl"><b>Named after the Nostromo</b>, the ship in <i>Alien</i> whose small crew answered a signal nobody else would. We picked <a href="aerosense.html" data-curtain="AeroSense">PS26230</a> the same way: roadside drug checks still wait hours on a lab, and we think one breath can answer sooner.</p>
+  <span class="corner br"><span class="hint">move your cursor over the name</span><span>scroll</span><span class="scroll-cue"></span></span>
+</header>
+</div>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span><span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span><span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span>
+    <span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span><span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span><span>PS26230 <i>✺</i></span><span class="o">PS26230 <i>✺</i></span>
+  </div>
+</div>
+
+<section id="manifesto">
+  <div class="wrap">
+    <span class="eyebrow">02 · why</span>
+    <p class="scrub wide" style="margin-top:28px">Drugs don't evaporate. They leave the lungs inside microscopic droplets. We're building a <em>₹35 test</em> that catches them at the roadside, in under <span class="bolt">a minute</span>, with no lab and no network.</p>
+  </div>
+</section>
+
+<section id="numbers" aria-label="Today versus AeroSense">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">03 · in numbers</span>
+      <h2 class="split-words">Today vs. AeroSense.</h2>
+    </div>
+    <div class="compare">
+      <div class="compare-head"><span></span><span>Today · lab testing</span><span>AeroSense</span></div>
+      <div class="compare-row reveal">
+        <span class="k">Cost</span>
+        <span class="old"><s>₹40,00,000+</s><small>per lab setup</small></span>
+        <span class="new">₹35–50<small>per test (projected)</small></span>
+      </div>
+      <div class="compare-row reveal">
+        <span class="k">Time to result</span>
+        <span class="old"><s>30+ min</s><small>plus transport and queue</small></span>
+        <span class="new">&lt; 45 s<small>on the spot (target)</small></span>
+      </div>
+      <div class="compare-row reveal">
+        <span class="k">Needs</span>
+        <span class="old"><s>Lab + chemist</s><small>blood or urine sample</small></span>
+        <span class="new">One breath<small>handheld, works offline</small></span>
+      </div>
+    </div>
+    <p class="note">Projected and target figures for the planned device, not measured results.</p>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">04 · work</span>
+      <h2 class="split-words">The flagship build.</h2>
+    </div>
+    <div class="feature3d">
+      <div class="stage" data-cursor="drag">
+        <canvas id="hero3d" aria-label="Interactive 3D concept model of the AeroSense reader. Drag to rotate."></canvas>
+        <div class="stage-fallback">Loading 3D model…</div>
+        <span class="stage-tag">concept model · CAD coming soon</span>
+        <span class="stage-hint">⟲ drag to rotate</span>
+      </div>
+      <div>
+        <h3 style="font-size:clamp(40px,5.5vw,76px);letter-spacing:-.04em;line-height:.95">AeroSense</h3>
+        <p class="lede" style="margin-top:16px">A handheld reader that catches the droplets in breath on a disposable electrode, reads them with a tiny potentiostat and classifies the result on the device.</p>
+        <div class="facts">
+          <div>Problem statement<b>SIH26230</b></div>
+          <div>Status<b>Phase 2 built · sprint next</b></div>
+          <div>Result in<b>&lt; 45 s (target)</b></div>
+          <div>Cost per test<b>₹35–50 (projected)</b></div>
+        </div>
+        <a class="btn primary" href="aerosense.html" data-curtain="AeroSense" style="margin-top:28px">Open the case study <span class="arrow">→</span></a>
+        <a class="btn" href="components.html" data-curtain="AeroSense" style="margin-top:28px;margin-left:8px">See the components</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hscroll" id="field" aria-label="Field work gallery">
+  <div class="hscroll-pin">
+    <div class="hscroll-track">
+      <div class="hcard intro">
+        <span class="eyebrow">05 · field</span>
+        <h2 class="split-words">We test ideas with the people who'd use them.</h2>
+        <p class="lede">The people who shaped the idea. Keep scrolling.</p>
+      </div>
+      <figure class="hcard"><div class="img"><img src="img/police.jpg" width="1280" height="960" alt="Team demonstrating the prototype to officers at D4 Kuniyamuthur Police Station" loading="lazy"></div><figcaption><b>Police requirements</b><p>At D4 Kuniyamuthur Police Station, officers confirmed the need for fast, non-invasive roadside triage.</p></figcaption></figure>
+      <figure class="hcard"><div class="img"><img src="img/doctor.jpg" width="1280" height="960" alt="Consultation with Dr. Raman Velumani, pulmonologist" loading="lazy"></div><figcaption><b>Pulmonologist consult</b><p>Dr. Raman Velumani (MBBS, DTCD) advised on respiratory sampling, including controlling temperature and humidity.</p></figcaption></figure>
+      <figure class="hcard"><div class="img"><img src="img/college-demo.jpg" width="1280" height="960" alt="Team presenting AeroSense at the SKCET internal hackathon review" loading="lazy"></div><figcaption><b>Internal Hackathon Review</b><p>Presenting AeroSense to the SKCET internal hackathon panel.</p></figcaption></figure>
+    </div>
+    <div class="hscroll-progress"><i></i></div>
+  </div>
+</section>
+
+<section id="team">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">06 · crew</span>
+      <h2 class="split-words">The people behind Nostromo.</h2>
+      <p class="lede">Hardware, firmware, ML and design, all done by the same small team.</p>
+    </div>
+    <!-- EDIT: for each person, set the name, "Department · Year", project role and links.
+         For the photo, put a portrait in img/team/ and replace the <span> with the <img> line
+         (remove the comment markers). Portrait photos (4:5) look best. -->
+    <div class="people">
+      <article class="person reveal">
+        <div class="photo"><span>M1</span><!-- <img src="img/team/member1.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">Team lead · Hardware</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+      <article class="person reveal">
+        <div class="photo"><span>M2</span><!-- <img src="img/team/member2.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">Firmware · ESP32</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+      <article class="person reveal">
+        <div class="photo"><span>M3</span><!-- <img src="img/team/member3.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">Edge ML · Data</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+      <article class="person reveal">
+        <div class="photo"><span>M4</span><!-- <img src="img/team/member4.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">Electrochemistry · Sensing</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+      <article class="person reveal">
+        <div class="photo"><span>M5</span><!-- <img src="img/team/member5.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">App · Dashboard</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+      <article class="person reveal">
+        <div class="photo"><span>M6</span><!-- <img src="img/team/member6.jpg" alt="Member Name"> --></div>
+        <div class="who">
+          <h3>Member Name</h3>
+          <div class="dept">Department · Year</div>
+          <div class="role">Fluidics · 3D design</div>
+          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <span class="eyebrow">07 · contact</span>
+    <p class="lede" style="margin-top:18px">Want to pilot AeroSense, mentor us, or just talk hardware?</p>
+    <h2 class="contact-big split-words">Let's <em>talk.</em></h2>
+    <!-- EDIT: put your team email in both data-email and the .addr text -->
+    <button class="copy-mail" type="button" data-email="727724euee044@skcet.ac.in" data-cursor="copy">
+      <span class="addr">727724euee044@skcet.ac.in</span><span class="hint">click to copy</span>
+    </button>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <span>© 2026 Team Nostromo · SKCET</span>
+    <span>built for SIH 2026 · PS SIH26230</span>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+<script src="site.js" defer></script>
+<script type="module" src="device3d.js"></script>
+<script type="module" src="showcase.js"></script>
+</body>
+</html>
