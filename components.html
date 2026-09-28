@@ -33,7 +33,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=601201">
+  <link rel="stylesheet" href="styles.css?v=601437">
 </head>
 <body>
 <div class="curtain" aria-hidden="true"><span>AeroSense</span></div>
@@ -43,8 +43,12 @@
 
 <nav class="nav">
   <div class="wrap">
-    <a href="index.html" class="brand" data-curtain="AeroSense"><img src="img/nostromo-mark.png" alt="">NOSTROMO</a>
+    <div class="nav-left">
+      <a href="index.html" class="brand" data-curtain="AeroSense"><img src="img/nostromo-mark.png" alt="">NOSTROMO</a>
+      <a class="nav-home" href="index.html" data-curtain="AeroSense">← home</a>
+    </div>
     <div class="nav-links">
+      <a class="only-menu" href="index.html" data-curtain="AeroSense">← Home</a>
       <a href="#hardware">Hardware</a>
       <a href="#flow">Signal path</a>
       <a href="#software">Software</a>
@@ -52,7 +56,7 @@
       <a href="#app">IoT app</a>
       <a href="aerosense.html" data-curtain="AeroSense">AeroSense</a>
     </div>
-    <div class="nav-status"><span class="dot"></span><span class="clock" data-clock>--:--:-- IST</span></div>
+    <div class="nav-right"><div class="nav-status"><span class="dot"></span><span class="clock" data-clock>--:--:-- IST</span></div><button class="nav-menu" type="button" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button></div>
   </div>
 </nav>
 
@@ -257,6 +261,6 @@
   </div>
 </footer>
 
-<script src="site.js?v=601201" defer></script>
+<script src="site.js?v=601437" defer></script>
 </body>
 </html>
