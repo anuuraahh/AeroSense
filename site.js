@@ -44,6 +44,9 @@
   /* ---------- giant words fill their container exactly, whatever font loads ---------- */
   const fit = () => d.querySelectorAll(".mega").forEach((el) => {
     const masks = el.querySelectorAll(".mask"); if (!masks.length) return;
+    /* measure the letters in their natural state (no locked widths, full weight) */
+    el.querySelectorAll(".ch").forEach((c) => { c.style.width = ""; c.style.removeProperty("--w"); });
+    el.dataset.fit = String((+el.dataset.fit || 0) + 1);
     el.style.fontSize = "";
     const size = parseFloat(getComputedStyle(el).fontSize);
     const w = masks[masks.length - 1].getBoundingClientRect().right - masks[0].getBoundingClientRect().left;
@@ -51,7 +54,13 @@
     if (w > 0 && avail > 0) el.style.fontSize = Math.min(340, size * (avail * 0.995) / w) + "px";
   });
   fit();
-  if (d.fonts && d.fonts.ready) d.fonts.ready.then(fit);
+  if (d.fonts) {
+    /* refit once the real display font has actually arrived (fonts.ready can resolve before
+       the headline font even starts loading, which left NOSTROMO too wide) */
+    d.fonts.ready.then(fit);
+    d.fonts.load('800 100px "Bricolage Grotesque"').then(fit).catch(() => {});
+    d.fonts.addEventListener && d.fonts.addEventListener("loadingdone", fit);
+  }
   let fitT; addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fit, 120); });
 
   /* headings animate in when they reach the viewport; the ones already on screen go first */
@@ -157,26 +166,66 @@
     setTimeout(reveal, cameByCurtain ? 420 : 60);
   }
 
-  /* ---------- deep space: a few distant stars, drawn once (no animation, no cost) ---------- */
+  /* ---------- deep space: a soft star field with a faint galactic band and a little nebula haze,
+     drawn once (no per-frame cost); a handful of stars twinkle gently with CSS ---------- */
   (() => {
     const c = d.createElement("canvas"); c.className = "stars"; c.setAttribute("aria-hidden", "true");
     d.body.prepend(c);
     const g = c.getContext("2d"); if (!g) return;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);   // same sky on every load
+    const blob = (x, y, rx, ry, rot, col, a) => {              // soft elliptical glow
+      g.save(); g.translate(x, y); g.rotate(rot); g.scale(1, ry / rx);
+      const gr = g.createRadialGradient(0, 0, 0, 0, 0, rx);
+      gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(1, `rgba(${col},0)`);
+      g.fillStyle = gr; g.beginPath(); g.arc(0, 0, rx, 0, 6.283); g.fill(); g.restore();
+    };
     const draw = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
       c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
       seed = 7;
-      const n = Math.round((W * H) / 9000);                       // sparse: ~140 on a laptop screen
+      /* faint nebula haze */
+      blob(W * 0.78, H * 0.22, Math.max(W, H) * 0.42, Math.max(W, H) * 0.2, -0.5, "124,110,255", 0.07);
+      blob(W * 0.12, H * 0.82, Math.max(W, H) * 0.36, Math.max(W, H) * 0.16, 0.4, "88,130,255", 0.05);
+      blob(W * 0.45, H * 0.55, Math.max(W, H) * 0.3, Math.max(W, H) * 0.1, -0.62, "170,120,255", 0.035);
+      /* a very faint galactic band running corner to corner */
+      const ang = -0.62, cx = W * 0.5, cy = H * 0.52, len = Math.hypot(W, H);
+      blob(cx, cy, len * 0.6, len * 0.07, ang, "190,196,255", 0.04);
+      const bandN = Math.round((W * H) / 3200);
+      for (let i = 0; i < bandN; i++) {
+        const t = (rnd() - 0.5) * len, off = (rnd() + rnd() + rnd() - 1.5) * len * 0.05;
+        const x = cx + Math.cos(ang) * t - Math.sin(ang) * off, y = cy + Math.sin(ang) * t + Math.cos(ang) * off;
+        if (x < 0 || y < 0 || x > W || y > H) continue;
+        g.globalAlpha = 0.08 + rnd() * 0.22; g.fillStyle = "#dfe3ff";
+        g.fillRect(x, y, 0.8, 0.8);
+      }
+      /* scattered stars */
+      const n = Math.round((W * H) / 5200);
       for (let i = 0; i < n; i++) {
         const x = rnd() * W, y = rnd() * H, z = rnd();
-        g.globalAlpha = 0.18 + z * z * 0.6;
-        g.fillStyle = rnd() < 0.2 ? "#c9cfff" : "#eef0ff";
-        g.beginPath(); g.arc(x, y, 0.35 + z * z * 0.9, 0, 6.283); g.fill();
+        g.globalAlpha = 0.16 + z * z * 0.6;
+        g.fillStyle = rnd() < 0.22 ? "#c9cfff" : rnd() < 0.08 ? "#ffe7c9" : "#eef0ff";
+        g.beginPath(); g.arc(x, y, 0.3 + z * z * 0.95, 0, 6.283); g.fill();
+      }
+      /* a few brighter stars with a soft halo */
+      for (let i = 0; i < Math.max(4, Math.round((W * H) / 180000)); i++) {
+        const x = rnd() * W, y = rnd() * H;
+        g.globalAlpha = 1; blob(x, y, 7 + rnd() * 5, 7 + rnd() * 5, 0, "200,206,255", 0.22);
+        g.globalAlpha = 0.9; g.fillStyle = "#f4f5ff"; g.beginPath(); g.arc(x, y, 1.1, 0, 6.283); g.fill();
       }
       g.globalAlpha = 1;
     };
     draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+    /* twinkling stars (a dozen, CSS-only) */
+    if (!reduce) {
+      const tw = d.createElement("div"); tw.className = "twinkles"; tw.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < 12; i++) {
+        const s = d.createElement("i");
+        s.style.left = (rnd() * 100).toFixed(2) + "%"; s.style.top = (rnd() * 100).toFixed(2) + "%";
+        s.style.animationDelay = (-rnd() * 6).toFixed(2) + "s"; s.style.animationDuration = (3.5 + rnd() * 4).toFixed(2) + "s";
+        tw.appendChild(s);
+      }
+      d.body.prepend(tw);
+    }
   })();
 
   /* ---------- live clock (India Standard Time) ---------- */
@@ -224,8 +273,10 @@
     };
     const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
     const zone = el.closest("section, header") || el;
-    zone.addEventListener("pointerenter", () => { if (!locked) lock(); measure(); });
-    zone.addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; if (!centers.length) measure(); kick(); });
+    let lockedFit = null;
+    const ensureLock = () => { if (!locked || lockedFit !== el.dataset.fit) { lock(); lockedFit = el.dataset.fit; } };
+    zone.addEventListener("pointerenter", () => { ensureLock(); measure(); });
+    zone.addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; ensureLock(); if (!centers.length) measure(); kick(); });
     zone.addEventListener("pointerleave", () => { px = py = -1e4; kick(); });
     addEventListener("scroll", () => { centers = []; }, { passive: true });
     addEventListener("resize", () => { locked = false; centers = []; });

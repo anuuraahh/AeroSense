@@ -905,7 +905,7 @@ html.lenis, html.lenis body { height: auto; }
 
 
 /* ---------- pinned opening: NOSTROMO → AeroSense E-Nose showcase → rest of the page ---------- */
-.intro-scroll { position: relative; height: calc(100svh - 62px + 340svh); }
+.intro-scroll { position: relative; height: calc(100svh - 62px + 315svh); }
 .intro-scroll .intro { position: sticky; top: 62px; }
 body:has(.intro .moon)::before { display: none; }           /* on the home page the moon lives inside the pinned hero */
 .intro .moon {
