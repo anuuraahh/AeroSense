@@ -374,7 +374,9 @@
   /* pacing: 2.2px of scrolling per 1px of sideways travel, with a short pause before and after
      so the gallery always reaches the last photo before the page carries on down */
   const H_SPEED = 2.8, holdIn = () => innerHeight * 0.15, holdOut = () => innerHeight * 0.35;
+  const stackH = () => innerWidth <= 700;                 // phones: the gallery is a plain vertical list
   const sizeH = () => hscrolls.forEach((h) => {
+    if (stackH()) { h.dist = 0; h.sec.style.height = "auto"; h.track.style.transform = ""; return; }
     h.dist = Math.max(0, h.track.scrollWidth - innerWidth);
     h.sec.style.height = reduce ? "auto" : (innerHeight + holdIn() + h.dist * H_SPEED + holdOut()) + "px";
   });
@@ -467,7 +469,7 @@
     });
 
     hscrolls.forEach((h) => {
-      if (reduce) return;
+      if (reduce || stackH()) return;
       const r = h.sec.getBoundingClientRect();
       const p = h.dist ? clamp01((-r.top - holdIn()) / (h.dist * H_SPEED)) : 0;
       h.track.style.transform = `translate3d(${(-p * h.dist).toFixed(1)}px, 0, 0)`;

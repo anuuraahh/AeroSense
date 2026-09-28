@@ -1033,3 +1033,14 @@ section.hscroll { padding-block: 0; }
 /* the nav clock hides only while the home-page AeroSense E-Nose showcase is on screen */
 .nav-status { transition: opacity .35s ease, visibility 0s; }
 .showcase-up .nav-status { opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s .35s; }
+
+/* phones: the field gallery becomes a simple vertical list (no sideways pinned scroll) */
+@media (max-width: 700px) {
+  section.hscroll { padding-block: clamp(56px, 12vw, 80px) 24px; }
+  .hscroll-pin { position: static; height: auto; overflow: visible; padding-top: 0; display: block; }
+  .hscroll-track { flex-direction: column; width: auto; gap: 40px; transform: none !important; }
+  .hscroll .hcard.intro { width: auto; }
+  .hscroll .hcard:not(.intro), .hscroll .hcard.tall { width: 100%; }
+  .hscroll .hcard:not(.intro) .img { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+  .hscroll-progress { display: none; }
+}
