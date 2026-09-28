@@ -599,7 +599,11 @@ function wireExplorer(v) {
   });
   /* the description pops up right next to the selected number */
   const pop = document.createElement("div"); pop.className = "hot-pop"; pop.setAttribute("role", "dialog"); pop.hidden = true;
-  layer.appendChild(pop);
+  /* phones: the stage is too small for a pop-up beside the number, so it becomes a sheet
+     pinned to the bottom of the screen and the model stays visible above it */
+  const sheetMQ = window.matchMedia("(max-width: 900px)");
+  const placePop = () => { (sheetMQ.matches ? document.body : layer).appendChild(pop); pop.classList.toggle("sheet", sheetMQ.matches); };
+  placePop(); sheetMQ.addEventListener ? sheetMQ.addEventListener("change", placePop) : sheetMQ.addListener(placePop);
   let popW = 0, popH = 0;
   v.onFrame = () => {
     const W = v.canvas.clientWidth, H = v.canvas.clientHeight;
@@ -637,10 +641,12 @@ function wireExplorer(v) {
     if (+slider.value < 40) { slider.value = 70; v.setExplode(0.7); }
     v.lookAtPart(key);
     info.innerHTML = `<div class="k">${p.k}</div><h3 style="margin-top:6px">${p.name}</h3><p>${p.info}</p>`;
-    pop.innerHTML = `<button type="button" class="x" aria-label="Close">×</button><div class="k">${i + 1} · ${p.k}</div><h4>${p.name}</h4><p>${p.info}</p><span class="hint">click ${i + 1} again to go back</span>`;
+    pop.innerHTML = `<button type="button" class="x" aria-label="Close">×</button><div class="k">${i + 1} · ${p.k}</div><h4>${p.name}</h4><p>${p.info}</p><span class="hint">${sheetMQ.matches ? "tap" : "click"} ${i + 1} again to go back</span>`;
     pop.querySelector(".x").addEventListener("click", () => select(null));
     pop.hidden = false; popW = pop.offsetWidth; popH = pop.offsetHeight;
   }
+  /* the phone sheet closes itself once the explorer scrolls out of view */
+  new IntersectionObserver((e) => { if (!e[0].isIntersecting && focus && sheetMQ.matches) select(null); }).observe(v.canvas.closest("section") || v.canvas);
   slider.addEventListener("input", () => v.setExplode(slider.value / 100));
   v.setExplode(slider.value / 100);                  // start in the slider's position (partly exploded)
   if (+slider.value > 30) v.view("wide");

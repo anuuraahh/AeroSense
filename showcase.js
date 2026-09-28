@@ -4,7 +4,7 @@
    site.js works out the scroll progress and publishes it as window.__heroProg (0 → 1). */
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildConceptModel } from "./device3d.js";
+import { buildConceptModel } from "./device3d.js?v=601865";
 
 const canvas = document.getElementById("showcase3d");
 
@@ -48,12 +48,13 @@ function init() {
   /* a soft light that slowly sweeps across the body so the clearcoat shows a moving glint */
   const sweep = new THREE.DirectionalLight(0xffffff, 1.6); scene.add(sweep);
 
-  let fullDist = 44;
+  let fullDist = 44, portrait = false;
   const resize = () => {
     const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    fullDist = w / h < 0.9 ? 44 / Math.max(0.55, w / h) * 0.75 : 44;          // keep the whole device in frame
+    portrait = w / h < 0.9;
+    fullDist = portrait ? 44 / Math.max(0.55, w / h) * 0.8 : 44;          // keep the whole device in frame
     camera.updateProjectionMatrix();
   };
   new ResizeObserver(resize).observe(canvas); resize();
@@ -79,9 +80,10 @@ function init() {
     turn.position.y = Math.sin(time * 1.1) * 0.18;
     /* camera: arrives in a close-up on the screen, lights and mouthpiece, then pulls back to the whole device */
     const z = ease(clamp01(s / 0.55));
-    const dist = fullDist * (0.38 + 0.62 * z);
+    const close = portrait ? 0.62 : 0.38;                         // phones: a gentler close-up so the top stays in frame
+    const dist = fullDist * (close + (1 - close) * z);
     camera.position.set(lerp(2.2, 0, z), lerp(4.2, 3.5, z), dist);
-    camera.lookAt(0, lerp(2.3, -0.6, z), 0);
+    camera.lookAt(0, lerp(portrait ? 3.0 : 2.3, -0.6, z), 0);
     sweep.position.set(Math.sin(time * 0.55) * 16, 10, 12);
     renderer.render(scene, camera);
   };

@@ -1082,3 +1082,20 @@ section.hscroll { padding-block: 0; }
 
 /* components page: titles take the same height so the tags and text line up across a row */
 .part h3 { min-height: 2.3em; display: flex; align-items: flex-end; line-height: 1.15; }
+
+/* exact alignment across each row of part cards: every card shares the row's
+   number / title / tag / text tracks (subgrid), so tags and text start on one line */
+@supports (grid-template-rows: subgrid) {
+  .parts { grid-auto-rows: auto; row-gap: 16px; }
+  .part { grid-row: span 4; grid-template-rows: subgrid; row-gap: 8px; align-content: stretch; }
+  .part h3 { min-height: 0; align-self: end; display: block; }
+  .part .role { align-self: start; }
+}
+
+/* explorer description on phones: bottom sheet, model stays visible */
+.hot-pop.sheet {
+  position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); top: auto;
+  width: auto; max-height: 42vh; overflow: auto; z-index: 70;
+  transform: none !important; animation: sheet-in .22s ease;
+}
+@keyframes sheet-in { from { opacity: 0; translate: 0 12px; } }
