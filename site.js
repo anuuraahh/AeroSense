@@ -118,6 +118,10 @@
     store.set("nostromo-curtain", "1"); store.set("nostromo-curtain-label", label);
     curtain.querySelector("span").textContent = label;
     curtain.classList.remove("out"); curtain.classList.add("in");
+    /* let the screen finish fading in (0.14 s) before the next page takes over; navigating mid-fade
+       made it jump from half to full opacity, the tiny flicker between pages */
+    e.preventDefault();
+    setTimeout(() => { location.href = url.href; }, 150);
   });
   addEventListener("pageshow", (e) => { if (e.persisted) curtain.classList.remove("in"); });
 

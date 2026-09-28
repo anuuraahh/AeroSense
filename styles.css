@@ -474,7 +474,7 @@ footer a:hover { color: var(--text); }
 }
 .curtain span { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 6vw, 72px); color: var(--signal-ink); letter-spacing: -.02em; }
 /* leaving: fades in over the old page while the browser is already loading the next one (no waiting) */
-.curtain.in { opacity: 1; visibility: visible; transition: opacity .18s ease; }   /* starts fading in the instant you click; the next page loads meanwhile */
+.curtain.in { opacity: 1; visibility: visible; transition: opacity .14s ease-out; }   /* starts fading in the instant you click; the next page loads meanwhile */
 /* arriving: covers the first frame, then fades away */
 .js.from-curtain .curtain { opacity: 1; visibility: visible; transition: none; }
 .js.from-curtain .curtain.out, .curtain.out { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
