@@ -932,7 +932,7 @@ body:has(.intro .moon)::before { display: none; }           /* on the home page 
 .intro .corner.bl, .intro .corner.br, .intro .corner.tl, .intro .corner.tr { opacity: calc(1 - var(--pw, 0)); transition: none; }
 .js .intro.on .corner.bl, .js .intro.on .corner.br, .js .intro.on .corner.tl, .js .intro.on .corner.tr { opacity: calc(1 - var(--pw, 0)); }
 @media (prefers-reduced-motion: reduce) { .showcase { transform: none; filter: none; } }
-@media (max-width: 640px) { .showcase-title { top: 12%; } .intro .showcase canvas { top: 26%; height: 72%; } }
+@media (max-width: 640px) { .showcase-title { top: 10%; z-index: 1; } .intro .showcase canvas { top: 17%; height: 83%; } }   /* taller canvas so the mouthpiece never clips on phones */
 
 /* =========================================================
    Components page (components.html)
