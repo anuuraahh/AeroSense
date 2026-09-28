@@ -405,9 +405,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 footer a:hover { color: var(--text); }
 
 /* ---------- lightbox ---------- */
-.lightbox { position: fixed; inset: 0; background: rgba(5, 6, 10, .92); display: none; place-items: center; z-index: 100; padding: 24px; cursor: zoom-out; }
+.lightbox { position: fixed; inset: 0; background: rgba(5, 6, 10, .92); display: none; place-items: center; z-index: 100; padding: 24px; box-sizing: border-box; cursor: zoom-out; }
 .lightbox.open { display: grid; }
-.lightbox img { max-height: 90vh; max-width: 94vw; border-radius: 10px; background: #fff; }
+.lightbox img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; border-radius: 10px; background: #fff; margin: auto; }   /* stays centred on phones */
 
 /* ---------- entrance motion (content is visible at rest; JS only animates things below the fold) ---------- */
 .reveal.pre { opacity: 0; transform: translateY(16px); }
@@ -1018,10 +1018,7 @@ section.hscroll { padding-block: 0; }
 @media (max-width: 900px) {
   /* pinned 3D views take less of the screen and fade into the text scrolling beneath them */
   .story-sticky { height: 44svh; }
-  .story-sticky::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: -26px; height: 26px; pointer-events: none;
-    background: linear-gradient(var(--bg), transparent);
-  }
+  .story-sticky { background: var(--surface); }       /* same colour as the section, so no dark block around the model */
   .explorer .stage { height: 40svh; min-height: 260px; }
   .story-step { padding-top: 12px; }
   .hotspot { width: 26px; height: 26px; font-size: 12px; }
@@ -1044,3 +1041,44 @@ section.hscroll { padding-block: 0; }
   .hscroll .hcard:not(.intro) .img { width: 100%; height: auto; aspect-ratio: 4 / 3; }
   .hscroll-progress { display: none; }
 }
+
+/* the big NOSTROMO word is decorative: normal arrow cursor, no text-selection I-beam */
+.intro, .intro-word, .intro-word *, .kinetic, .kinetic * { cursor: default !important; -webkit-user-select: none; user-select: none; }
+.intro a, .intro a * { cursor: pointer !important; }
+@media (max-width: 900px) { .story-sticky .stage { box-shadow: none; } }
+
+/* ---------- nav: home link (sub-pages) + phone menu ---------- */
+.nav-left { display: flex; align-items: center; gap: 20px; min-width: 0; }
+.nav-home { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .06em; color: var(--dim); white-space: nowrap; transition: color .2s; }
+.nav-home:hover { color: var(--signal-ink); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-menu { display: none; }
+.nav-links .only-menu { display: none; }
+@media (max-width: 900px) {
+  .nav-home { display: none; }                         /* on phones "← Home" lives in the menu */
+  .nav-menu {
+    display: grid; place-content: center; gap: 5px; width: 38px; height: 38px; padding: 0; cursor: pointer;
+    border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface);
+  }
+  .nav-menu i { display: block; width: 16px; height: 1.5px; background: var(--text); border-radius: 2px; transition: transform .25s ease; }
+  .nav.menu-open .nav-menu i:first-child { transform: translateY(3.25px) rotate(45deg); }
+  .nav.menu-open .nav-menu i:last-child { transform: translateY(-3.25px) rotate(-45deg); }
+  .nav.menu-open .nav-links {
+    display: flex; flex-direction: column; gap: 0; position: absolute; left: 0; right: 0; top: 100%;
+    padding: 6px var(--gutter) 14px; background: var(--bg); border-bottom: 1px solid var(--line);
+    box-shadow: 0 24px 40px -20px rgba(0, 0, 0, .8);
+    animation: menu-in .2s ease;
+  }
+  .nav.menu-open .nav-links a { padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  .nav.menu-open .nav-links a:last-child { border-bottom: 0; }
+  .nav.menu-open .nav-links a::before, .nav.menu-open .nav-links a::after { content: none; }
+  .nav-links .only-menu { display: block; color: var(--signal-ink) !important; }
+}
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (max-width: 420px) {
+  .nav-status { font-size: 11px; padding: 5px 8px; gap: 6px; }
+  .brand { letter-spacing: .12em; }
+}
+
+/* components page: titles take the same height so the tags and text line up across a row */
+.part h3 { min-height: 2.3em; display: flex; align-items: flex-end; line-height: 1.15; }

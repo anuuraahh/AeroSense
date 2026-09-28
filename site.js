@@ -121,6 +121,16 @@
   });
   addEventListener("pageshow", (e) => { if (e.persisted) curtain.classList.remove("in"); });
 
+  /* ---------- phone menu ---------- */
+  const navEl = d.querySelector(".nav"), menuBtn = d.querySelector(".nav-menu");
+  if (navEl && menuBtn) {
+    const setMenu = (open) => { navEl.classList.toggle("menu-open", open); menuBtn.setAttribute("aria-expanded", String(open)); menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu"); };
+    menuBtn.addEventListener("click", () => setMenu(!navEl.classList.contains("menu-open")));
+    navEl.querySelectorAll(".nav-links a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+    d.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+    d.addEventListener("click", (e) => { if (navEl.classList.contains("menu-open") && !navEl.contains(e.target)) setMenu(false); });
+  }
+
   /* ---------- intro loader ---------- */
   const loader = d.querySelector(".loader");
   const firstVisit = loader && !root.classList.contains("intro-seen") && !reduce && !cameByCurtain;
