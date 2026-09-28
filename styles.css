@@ -36,7 +36,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; }   /* smooth scrolling is handled in site.js (Lenis); CSS smooth fights it */
+html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }   /* scrollbar space never comes and goes, so nothing jumps sideways between pages (no overflow on html: that would break the sticky pinned sections) */   /* smooth scrolling is handled in site.js (Lenis); CSS smooth fights it */
 body {
   margin: 0;
   background:
@@ -1099,3 +1099,10 @@ section.hscroll { padding-block: 0; }
   transform: none !important; animation: sheet-in .22s ease;
 }
 @keyframes sheet-in { from { opacity: 0; translate: 0 12px; } }
+
+/* the AeroSense label on the page-change screen is drawn as a shape, not text, so it never
+   flickers between fonts while the next page's web fonts load */
+.curtain-mark { display: block; width: clamp(150px, 31vw, 380px); height: auto; fill: var(--signal-ink); }
+/* leaving the screen: the label goes first, then the dark screen, so the word never overlaps the new page */
+.curtain .curtain-mark { transition: opacity .16s ease; }
+.curtain.out .curtain-mark { opacity: 0; }

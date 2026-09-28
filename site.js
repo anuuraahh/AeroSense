@@ -71,7 +71,7 @@
 
   /* ---------- page curtain ---------- */
   let curtain = d.querySelector(".curtain");
-  if (!curtain) { curtain = d.createElement("div"); curtain.className = "curtain"; curtain.innerHTML = "<span></span>"; d.body.appendChild(curtain); }
+  if (!curtain) { curtain = d.createElement("div"); curtain.className = "curtain"; d.body.appendChild(curtain); }
   const cameByCurtain = root.classList.contains("from-curtain");
   if (cameByCurtain) {
     requestAnimationFrame(() => {
@@ -116,7 +116,6 @@
     if (reduce) return;
     const label = "AeroSense";                               // every page change shows the same AeroSense screen
     store.set("nostromo-curtain", "1"); store.set("nostromo-curtain-label", label);
-    curtain.querySelector("span").textContent = label;
     curtain.classList.remove("out"); curtain.classList.add("in");
     /* let the screen finish fading in (0.14 s) before the next page takes over; navigating mid-fade
        made it jump from half to full opacity, the tiny flicker between pages */
@@ -155,7 +154,7 @@
   } else {
     if (loader) loader.remove();
     store.set("nostromo-intro", "1");
-    setTimeout(reveal, cameByCurtain ? 120 : 60);
+    setTimeout(reveal, cameByCurtain ? 420 : 60);
   }
 
   /* ---------- deep space: a few distant stars, drawn once (no animation, no cost) ---------- */
