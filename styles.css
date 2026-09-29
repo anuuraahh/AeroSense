@@ -1207,3 +1207,23 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 .ps-desc::-webkit-scrollbar { width: 8px; } .ps-desc::-webkit-scrollbar-thumb { background: #c5cbff; border-radius: 8px; }
 .ps-desc { scrollbar-color: #c5cbff transparent; }
 .ps-foot { color: #8a8fb3; }
+
+/* ---------- the film (YouTube, loads only on click) ---------- */
+.film { margin-top: clamp(48px, 7vw, 96px); }
+.film-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.film-head h3 { font-size: clamp(26px, 3.2vw, 40px); letter-spacing: -.03em; line-height: 1; margin-top: 8px; }
+.film-yt { font-family: var(--font-mono); font-size: 13px; color: var(--signal-ink); text-decoration: none; border-bottom: 1px solid var(--signal-dim); padding-bottom: 2px; }
+.film-yt:hover { border-color: var(--signal); }
+.film-frame { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); cursor: pointer; box-shadow: var(--shadow-lg); }
+.film-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .85; transition: opacity .3s, transform .6s; }
+.film-frame:hover img { opacity: 1; transform: scale(1.015); }
+.film-frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(10,11,18,.75)); pointer-events: none; }
+.film-play { position: absolute; left: 50%; top: 50%; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; background: var(--signal); display: grid; place-items: center; box-shadow: 0 0 0 10px var(--signal-dim), 0 12px 40px rgba(0,0,0,.5); transition: transform .25s; z-index: 1; }
+.film-play svg { width: 34px; height: 34px; fill: var(--bg); margin-left: 4px; }
+.film-frame:hover .film-play, .film-frame:focus-visible .film-play { transform: scale(1.08); }
+.film-frame:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+.film-meta { position: absolute; left: 20px; bottom: 16px; z-index: 1; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--muted); }
+.film-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.film-frame.on { cursor: default; }
+.film-frame.on::after { display: none; }
+@media (max-width: 640px) { .film-play { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .film-play svg { width: 26px; height: 26px; } .film-meta { display: none; } }
