@@ -147,7 +147,7 @@
       <h4>Description</h4><p>Participants are to design and build a prototype handheld device capable of detecting the presence of common narcotic substances (such as opioids, cannabis, and synthetic drugs) through breath-sample analysis, using electrochemical or equivalent sensing technology.</p>
       <p>The device should:</p><ul><li>Provide a rapid, near real-time result at the point of testing.</li><li>Be portable and operable by field personnel with minimal training.</li><li>Indicate a clear positive / negative / inconclusive result.</li><li>Be built using accessible sensor components suitable for a working prototype demonstration.</li></ul>
       <h4>Expected Deliverables</h4><p>A working hardware prototype capable of demonstrating breath-sample analysis and producing a result, along with a brief technical explanation of the sensing method used and its accuracy on a provided or self-generated test set.</p>
-      <h4>Note to Participants</h4><p><mark class="ps-key"><strong>This is a proof-of-concept prototype intended to demonstrate technical feasibility.</strong></mark> It is not expected to be a forensically validated or field-certified device at the end of the hackathon.</p>`,
+      <h4>Note to Participants</h4><p>This is a <mark class="ps-key"><strong>proof-of-concept prototype</strong></mark> intended to demonstrate technical feasibility. It is <mark class="ps-key"><strong>not expected to be a forensically validated or field-certified</strong></mark> device at the end of the hackathon.</p>`,
     more: [["Organization", "Ministry of Home Affairs"], ["Department", "Narcotics Control Bureau"], ["Category", "Hardware"], ["Theme", "MedTech / BioTech / HealthTech"]],
   };
   let psModal = null, psLast = null;
