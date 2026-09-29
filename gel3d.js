@@ -16,32 +16,37 @@ const rand = (a, b) => a + Math.random() * (b - a);
 const rn = () => Math.random() + Math.random() + Math.random() - 1.5;
 const peakOf = (cov) => 25 * (1 - 0.76 * cov);          // 25 µA clean → ~6 µA fully blocked
 
+/* Timelines are in "model seconds". The model runs at SLOW × real time, so every step
+   stays on screen for 5–8 real seconds: long enough to read the caption and watch it happen. */
+const SLOW = 0.6;
 const MODES = {
   breath: {
-    dur: 17.5, emit: [1.0, 6.0], sweep: [8.0, 12.0], read: 12.0,
+    dur: 23, emit: [2.0, 9.0], sweep: [12.0, 17.0], read: 18.0,
+    intro: ["Breath mode · ready", "The strip was scanned when it went in: 25 µA on clean carbon. Now someone blows."],
     steps: [
-      ["Impact", 1.0, "Air turns at the 1.2 mm slit. The heavier droplets can't, so they hit the gel 2 mm below."],
-      ["Merge", 1.9, "Each droplet joins the gel and releases whatever it carried."],
-      ["Diffuse", 3.2, "The mesh's pores are far wider than the molecules, so they drift down to the carbon."],
-      ["Exchange", 8.0, "Saline links WE, RE and CE. During the sweep, probe ions hand electrons to free carbon (the sparks)."],
-      ["Block", 9.6, "Bulky molecules sit on WE2's carbon. Probes can't reach those spots, so fewer sparks."],
-      ["Read", 12.0, "Fewer electrons get through, so the DPV peak falls. WE1 reads the background: ΔI = WE2 − WE1."],
+      ["Impact", 2.0, "Breath enters through a 1.2 mm slit. The air turns sideways just above the gel; the heavier droplets can't turn, so they hit it."],
+      ["Merge", 5.0, "Each droplet lands in the gel and becomes part of it, releasing whatever it carried (the orange marker molecules)."],
+      ["Diffuse", 8.0, "The gel's mesh is far wider than the molecules, so they drift down through it to the carbon electrodes."],
+      ["Exchange", 12.0, "The reader sweeps the voltage. Probe ions (cyan) hand electrons to any free carbon: each spark is one of those handovers."],
+      ["Block", 14.5, "The marker molecules sit on WE2's carbon. Probes can't reach those spots, so there are fewer sparks and less current."],
+      ["Read", 18.0, "The DPV peak falls from 25 µA to about 6 µA. WE1 reads the background, and the result uses ΔI = WE2 − WE1."],
     ],
-    cam: [[0, [10, 8, 12], [0, 1.8, -0.2]], [2, [6.8, 5.6, 8.8], [0, 2.5, -0.2]], [5, [5, 2.4, 7.4], [0.4, 1.0, -0.2]],
-          [8.6, [3.4, 1.35, 4.4], [1.7, 0.25, -0.2]], [12.4, [8.5, 5.6, 10.5], [0, 1.2, -0.2]]],
+    cam: [[0, [10, 8, 12], [0, 1.8, -0.2]], [2.6, [6.8, 5.6, 8.8], [0, 2.5, -0.2]], [6.5, [5, 2.4, 7.4], [0.4, 1.0, -0.2]],
+          [10.5, [4.6, 2.0, 6.4], [0.8, 0.6, -0.2]], [12.8, [3.4, 1.35, 4.4], [1.7, 0.25, -0.2]], [18, [8.5, 5.6, 10.5], [0, 1.2, -0.2]]],
   },
   touch: {
-    dur: 19.5, cover: [1.0, 2.0], down: [2.0, 3.0], hold: [3.0, 9.0], up: [9.0, 10.0], emit: [3.1, 8.8], sweep: [10.0, 13.8], read: 13.8,
+    dur: 24.5, cover: [2.0, 3.2], down: [3.2, 4.4], hold: [4.4, 10.4], up: [10.4, 11.6], emit: [4.6, 10.2], sweep: [13.0, 18.0], read: 19.0,
+    intro: ["Touch mode · ready", "The breath didn't pass the 1.5 L gate, so the reader asks for a fingertip instead. Same cartridge, same gel."],
     steps: [
-      ["Contact", 1.0, "The cover slides open. The capacitive ring checks the finger stays put for the whole hold."],
-      ["Merge", 3.2, "Sweat from the pores on each ridge soaks into the salty gel."],
-      ["Diffuse", 4.6, "Molecules drift down through the mesh to the carbon."],
-      ["Exchange", 10.0, "Same saline circuit, same DPV sweep as Breath mode."],
-      ["Block", 11.4, "Bulky molecules sit on WE2's carbon. Probes can't reach those spots, so fewer sparks."],
-      ["Read", 13.8, "The peak falls: same thresholds as a breath test. ΔI = WE2 − WE1."],
+      ["Contact", 2.0, "The cover slides open and a finger presses on the gel. The capacitive ring checks it stays put for the whole hold."],
+      ["Merge", 5.2, "Sweat from the pores on each fingerprint ridge soaks into the salty gel, carrying the marker with it."],
+      ["Diffuse", 8.2, "The molecules drift down through the gel's mesh to the carbon, exactly as they do from breath."],
+      ["Exchange", 13.0, "Finger lifts, and the same voltage sweep runs. Each spark is a probe ion handing an electron to free carbon."],
+      ["Block", 15.5, "The marker sits on WE2's carbon and blocks the probes, so fewer sparks and less current."],
+      ["Read", 19.0, "The peak falls the same way as a breath test, with the same thresholds. ΔI = WE2 − WE1."],
     ],
-    cam: [[0, [10, 7.5, 11.5], [0, 1.6, -0.2]], [2.4, [9, 3.6, 8.2], [0, 2.0, -0.2]], [4.4, [7.4, 2.2, 7.6], [0, 1.1, -0.2]], [8.8, [6.8, 1.8, 7.0], [0, 1.0, -0.2]],
-          [10.6, [3.4, 1.35, 4.4], [1.7, 0.25, -0.2]], [14, [8.5, 5.6, 10.5], [0, 1.2, -0.2]]],
+    cam: [[0, [10, 7.5, 11.5], [0, 1.6, -0.2]], [3.2, [9, 3.6, 8.2], [0, 2.0, -0.2]], [5.6, [7.4, 2.2, 7.6], [0, 1.1, -0.2]], [10.6, [6.8, 1.8, 7.0], [0, 1.0, -0.2]],
+          [13.6, [3.4, 1.35, 4.4], [1.7, 0.25, -0.2]], [19, [8.5, 5.6, 10.5], [0, 1.2, -0.2]]],
   },
 };
 
@@ -52,27 +57,27 @@ function buildDom(root) {
     <canvas aria-label="Working 3D model of the hydrogel pad on the electrode strip"></canvas>
     <div class="stage-fallback">Loading 3D model…</div>
     <div class="gel-tags" aria-hidden="true"></div>
-    <div class="gel-cap" aria-live="polite"><span class="k"></span><p></p></div>
-    <span class="stage-hint">⟲ drag to orbit</span>
   </div>
-  <div class="gel-panel">
-    <div class="card gel-card">
-      <div class="seg" data-g="mode" role="group" aria-label="Sampling mode">
-        <button type="button" data-v="breath">Breath mode</button><button type="button" data-v="touch">Touch mode</button>
-      </div>
-      <div class="seg" data-g="sample" role="group" aria-label="Sample">
-        <button type="button" data-v="marker">Marker present</button><button type="button" data-v="clean">Clean sample</button>
-      </div>
-      <ol class="gsteps"></ol>
-      <div class="ghold"><span>finger hold</span><i><b></b></i><em>0.0 s</em></div>
-      <div class="screen gel-screen">
-        <canvas></canvas>
-        <div class="row"><span>WE2 peak</span><b data-o="peak">—</b></div>
-        <div class="row"><span>ΔI = WE2 − WE1</span><b data-o="di">—</b></div>
-        <div class="row"><span>result</span><b class="res" data-o="res">waiting</b></div>
-      </div>
-      <button class="btn" type="button" data-g="replay" style="justify-self:start">↻ Replay</button>
+  <div class="gel-bar">
+    <div class="seg" data-g="mode" role="group" aria-label="Sampling mode">
+      <button type="button" data-v="breath">Breath</button><button type="button" data-v="touch">Touch</button>
     </div>
+    <div class="seg" data-g="sample" role="group" aria-label="Sample">
+      <button type="button" data-v="marker">Marker</button><button type="button" data-v="clean">Clean</button>
+    </div>
+    <button class="gbtn" type="button" data-g="pause" aria-label="Pause">❚❚</button>
+    <button class="gbtn" type="button" data-g="replay" aria-label="Replay from the start">↻</button>
+  </div>
+  <div class="gel-dpv">
+    <canvas></canvas>
+    <div class="row"><span>WE2 peak</span><b data-o="peak">—</b></div>
+    <div class="row"><span>ΔI</span><b data-o="di">—</b></div>
+    <div class="row"><span>result</span><b class="res" data-o="res">waiting</b></div>
+    <div class="ghold" hidden><span>hold</span><i><b></b></i><em>0.0 s</em></div>
+  </div>
+  <div class="gel-cap" aria-live="polite">
+    <div class="gel-prog"></div>
+    <span class="k"></span><p></p>
   </div>`;
 }
 
@@ -119,9 +124,10 @@ class GelLab {
     this.stage = root.querySelector(".gel-stage");
     this.canvas = this.stage.querySelector("canvas");
     this.cap = root.querySelector(".gel-cap");
-    this.stepsEl = root.querySelector(".gsteps");
+    this.prog = root.querySelector(".gel-prog");
     this.holdEl = root.querySelector(".ghold");
-    this.chart = root.querySelector(".gel-screen canvas");
+    this.paused = false;
+    this.chart = root.querySelector(".gel-dpv canvas");
     this.out = Object.fromEntries([...root.querySelectorAll("[data-o]")].map((e) => [e.dataset.o, e]));
     this.visible = false; this.running = false; this.autoCam = true;
     this.three();
@@ -291,9 +297,12 @@ class GelLab {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.distK = clamp(1.25 / (w / h), 1, 2);
+    /* the caption sits over the bottom of the stage on wide screens: lift the model a little */
+    const lift = w > 760 ? Math.round(h * 0.07) : 0;
+    this.camera.setViewOffset(w, h, 0, lift, w, h);
     this.camera.updateProjectionMatrix();
-    const cw = this.chart.clientWidth || 300, dpr = Math.min(devicePixelRatio || 1, 2);
-    this.chart.width = cw * dpr; this.chart.height = 130 * dpr; this.cdpr = dpr;
+    const cw = this.chart.clientWidth || 240, chh = this.chart.clientHeight || 88, dpr = Math.min(devicePixelRatio || 1, 2);
+    this.chart.width = cw * dpr; this.chart.height = chh * dpr; this.cdpr = dpr;
     this.drawChart();
   }
 
@@ -304,9 +313,13 @@ class GelLab {
     segs.forEach((s) => s.addEventListener("click", (e) => {
       const b = e.target.closest("button"); if (!b) return;
       if (s.dataset.g === "mode") this.mode = b.dataset.v; else this.sample = b.dataset.v;
-      sync(); this.autoCam = true; this.reset();
+      sync(); this.autoCam = true; this.setPause(false); this.reset();
     }));
-    this.root.querySelector("[data-g=replay]").addEventListener("click", () => { this.autoCam = true; this.reset(); });
+    const pb = this.root.querySelector("[data-g=pause]");
+    const setPause = (p) => { this.paused = p; pb.textContent = p ? "▶" : "❚❚"; pb.setAttribute("aria-label", p ? "Play" : "Pause"); this.root.classList.toggle("paused", p); };
+    this.setPause = setPause;
+    pb.addEventListener("click", () => setPause(!this.paused));
+    this.root.querySelector("[data-g=replay]").addEventListener("click", () => { this.autoCam = true; setPause(false); this.reset(); });
     sync();
   }
 
@@ -314,8 +327,8 @@ class GelLab {
     const M = (this.M = MODES[this.mode]);
     this.t = 0; this.peakShown = null;
     this.root.dataset.mode = this.mode;
-    this.stepsEl.innerHTML = M.steps.map(([n, , d], i) => `<li><span class="n">${String(i + 1).padStart(2, "0")}</span><div><b>${n}</b><p>${d}</p></div></li>`).join("");
-    this.stepLis = [...this.stepsEl.children]; this.stepIdx = -2;
+    this.prog.innerHTML = M.steps.map(() => "<i><b></b></i>").join("");
+    this.progBars = [...this.prog.querySelectorAll("b")]; this.stepIdx = -2;
     this.holdEl.hidden = this.mode !== "touch";
     for (let i = 0; i < this.NP; i++) {
       this.pp[i * 3] = rand(-3.7, 3.7); this.pp[i * 3 + 1] = rand(GEL.y0 + 0.08, GEL.top - 0.08); this.pp[i * 3 + 2] = GEL.cz + rand(-2.45, 2.45);
@@ -411,7 +424,8 @@ class GelLab {
       contact = t > M.down[1] - 0.05 && t < M.up[0] + 0.05 ? 1 : 0;
       const hp = clamp((t - M.hold[0]) / (M.hold[1] - M.hold[0]), 0, 1);
       this.holdEl.querySelector("b").style.transform = `scaleX(${hp})`;
-      this.holdEl.querySelector("em").textContent = hp >= 1 ? "✓ held 6 s" : (hp * 6).toFixed(1) + " s";
+      const hs = (M.hold[1] - M.hold[0]) / SLOW;         // real seconds
+      this.holdEl.querySelector("em").textContent = hp >= 1 ? `✓ ${Math.round(hs)} s` : (hp * hs).toFixed(1) + " s";
       this.holdEl.classList.toggle("on", contact === 1);
       if (t > M.emit[0] && t < M.emit[1]) {
         this.sweatAcc += dt * 20;
@@ -514,12 +528,16 @@ class GelLab {
     let idx = -1; M.steps.forEach((s, i) => { if (t >= s[1]) idx = i; });
     if (idx !== this.stepIdx) {
       this.stepIdx = idx;
-      this.stepLis.forEach((li, i) => { li.classList.toggle("on", i === idx); li.classList.toggle("done", i < idx); });
-      const s = M.steps[Math.max(0, idx)];
-      this.cap.querySelector(".k").textContent = idx < 0 ? (breath ? "Breath mode · ready" : "Touch mode · ready") : `${String(idx + 1).padStart(2, "0")} · ${s[0]}`;
-      this.cap.querySelector("p").textContent = idx < 0 ? (breath ? "Baseline scan done: 25 µA on clean carbon. Waiting for a breath." : "Breath failed the 1.5 L gate. Switching to the fingertip.") : s[2];
+      const s = M.steps[idx], txt = idx < 0 ? M.intro : [`${String(idx + 1).padStart(2, "0")} / ${String(M.steps.length).padStart(2, "0")} · ${s[0]}`, s[2]];
+      this.cap.querySelector(".k").textContent = txt[0];
+      this.cap.querySelector("p").textContent = txt[1];
       this.cap.classList.remove("in"); void this.cap.offsetWidth; this.cap.classList.add("in");
     }
+    /* progress: one bar per step, filling while that step is on screen */
+    this.progBars.forEach((b, i) => {
+      const a = M.steps[i][1], z = i + 1 < M.steps.length ? M.steps[i + 1][1] : M.dur;
+      b.style.transform = `scaleX(${clamp((t - a) / (z - a), 0, 1)})`;
+    });
 
     if (t > M.dur) { this.reset(); }
   }
@@ -558,14 +576,14 @@ class GelLab {
   }
 
   frame(dt) {
-    this.step(dt);
+    if (!this.paused) this.step(dt * SLOW);
     const c = this.controls;
     if (this.autoCam) {
       const [p, tg] = this.camAt(this.t);
       const k = this.distK || 1;                          // narrow stage: step back so the pad still fits across
       for (let j = 0; j < 3; j++) p[j] = tg[j] + (p[j] - tg[j]) * k;
-      this.camera.position.lerp(this._v.set(...p), Math.min(1, dt * 2.2));
-      c.target.lerp(new THREE.Vector3(...tg), Math.min(1, dt * 2.2));
+      this.camera.position.lerp(this._v.set(...p), Math.min(1, dt * 1.6));
+      c.target.lerp(new THREE.Vector3(...tg), Math.min(1, dt * 1.6));
     }
     c.update();
     this.renderer.render(this.scene, this.camera);

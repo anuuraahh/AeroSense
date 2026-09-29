@@ -4,7 +4,7 @@
    site.js works out the scroll progress and publishes it as window.__heroProg (0 → 1). */
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildConceptModel } from "./device3d.js?v=678706";
+import { buildConceptModel } from "./device3d.js?v=680942";
 
 const canvas = document.getElementById("showcase3d");
 
