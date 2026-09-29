@@ -18,12 +18,12 @@ const ACCENT = 0x5b6ee1, BLUE = 0x238bc4, AMBER = 0xe0a21a, RED = 0xe0483f, GREE
 
 /* ---------- part metadata (explorer chips + hotspots) ---------- */
 export const PARTS = [
-  { key: "cartridge", name: "Single-use cartridge", k: "consumable", info: "Mouthpiece, micro-impactor nozzle and sealed buffer blister. It clicks into the top of the reader and is thrown away after one test, so nothing carries over between people." },
-  { key: "strip", name: "Screen-printed electrode", k: "sensing surface", info: "A three-electrode strip (working, reference, counter) sitting under the nozzle. Breath droplets land here, and the buffer turns them into something the electronics can measure." },
-  { key: "heater", name: "37 °C chamber heater", k: "conditioning", info: "Keeps the impaction zone at body temperature so breath moisture doesn't condense unevenly and skew the reading." },
-  { key: "pressure", name: "Breath flow sensor", k: "sample quality", info: "A differential pressure sensor that measures flow and exhaled volume. No result is given until the breath is deep enough." },
-  { key: "afe", name: "Potentiostat front-end", k: "measurement", info: "Applies a voltage sweep across the strip and measures the tiny currents that come back: the voltammetry curve." },
-  { key: "esp32", name: "ESP32 controller", k: "brain", info: "Runs the test sequence and the on-device ML model that classifies the curve. It needs no internet connection." },
+  { key: "cartridge", name: "Single-use cartridge", k: "consumable", info: "Mouthpiece and Venturi nozzle: a 1.2 mm slit that fires the breath at the gel from 2 mm away. It clicks into the top of the reader and is thrown away after one test, so nothing carries over between people." },
+  { key: "touch", name: "Touch pad", k: "touch mode", info: "If someone can't or won't blow, this cover slides aside and they press a fingertip on the same hydrogel for 5–10 seconds. A capacitive ring around the pad checks the finger stays in contact before the reading starts." },
+  { key: "strip", name: "Electrode strip + hydrogel", k: "sensing surface", info: "Screen-printed carbon with two working electrodes (control and sensing), an Ag/AgCl reference and a counter electrode. A pre-cast hydrogel of saline and a redox probe sits on top, so droplets or sweat land in a ready-made circuit." },
+    { key: "pressure", name: "Breath flow sensor", k: "sample quality", info: "A differential pressure sensor that adds up flow into exhaled volume. Below the 1.5 L gate, no breath result is given and the reader switches to Touch mode." },
+  { key: "afe", name: "Potentiostat front-end", k: "measurement", info: "Runs a differential pulse sweep from −0.2 to +0.6 V and measures the redox probe's current. Molecules blocking the carbon lower the peak." },
+  { key: "esp32", name: "ESP32 controller", k: "brain", info: "Gates the test on breath volume or held touch, runs the sweep, subtracts the control electrode and classifies the curve on the device. It needs no internet connection." },
   { key: "battery", name: "18650 Li-ion cell", k: "power", info: "Rechargeable over USB-C, sized for a full shift of roadside or clinic testing." },
   { key: "front", name: "Display & result lights", k: "interface", info: "OLED screen plus green, amber and red lights, so an officer can read the result without training." },
 ];
@@ -182,10 +182,11 @@ export function buildConceptModel(opts = {}) {
   add("battery", bat, [0, -0.4, -2.6]);
 
   /* heated impaction seat at the top of the reader */
+  /* (the older 37 °C heater ring was dropped: the pre-cast hydrogel replaces the heated buffer well) */
   const heater = new THREE.Group(); heater.position.set(0, 6.45, 0);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.09, 12, 48), mat({ color: 0xe0802a, roughness: 0.4, emissive: 0x5a2a00, emissiveIntensity: 0.3 }));
   ring.rotation.x = Math.PI / 2; heater.add(ring);
-  add("heater", heater, [-3.4, 1.4, 0.6]);
+
 
   /* cartridge: housing + nozzle + mouthpiece + blister */
   const cart = new THREE.Group(); cart.position.set(0, 7.75, 0);
@@ -203,8 +204,27 @@ export function buildConceptModel(opts = {}) {
   const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.78, 0.3, 40), black); collar.position.set(0, 1.28, 0); cart.add(collar);   // where it joins the chamber
   const lip = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.08, 12, 40), accent); lip.position.set(0, 1.95, 3.5); cart.add(lip);
   const blister = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), metal);
-  blister.rotation.z = -Math.PI / 2; blister.position.set(1.72, 0.2, -0.4); cart.add(blister);
+  blister.rotation.z = -Math.PI / 2; blister.position.set(1.72, 0.2, -0.4);   // not added: no buffer blister in the hydrogel design
   add("cartridge", cart, [0, 5.2, 0]);
+
+  /* Touch mode: a hydrogel pad on the front of the cartridge, ringed by a capacitive touch electrode,
+     behind a sliding cover. If a subject can't or won't blow, the cover slides aside and a fingertip
+     is pressed on the same gel for 5–10 s. */
+  const touch = new THREE.Group(); touch.position.set(0, 7.7, 1.3);
+  const well = new THREE.Mesh(new RoundedBoxGeometry(2.3, 1.55, 0.1, 3, 0.12), black); well.position.z = 0.03; touch.add(well);
+  const gel = new THREE.Mesh(new RoundedBoxGeometry(1.6, 0.95, 0.08, 3, 0.1),
+    mat({ color: 0x4f97d6, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, emissive: 0x2a4a8a, emissiveIntensity: 0.35 }));
+  gel.position.z = 0.09; touch.add(gel);
+  const ringMat = mat({ color: ACCENT, metalness: 0.6, roughness: 0.3, emissive: ACCENT, emissiveIntensity: 0.25 });
+  [[0, 0.56, 1.88, 0.07], [0, -0.56, 1.88, 0.07], [0.91, 0, 0.07, 1.19], [-0.91, 0, 0.07, 1.19]].forEach(([x, y, w, h]) => {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.05), ringMat); bar.position.set(x, y, 0.1); touch.add(bar);
+  });
+  [0.72, -0.72].forEach((y) => { const rail = new THREE.Mesh(new RoundedBoxGeometry(2.6, 0.08, 0.1, 2, 0.03), black); rail.position.set(0.1, y, 0.14); touch.add(rail); });
+  const cover = new THREE.Group(); cover.position.z = 0.2;
+  cover.add(new THREE.Mesh(new RoundedBoxGeometry(2.0, 1.36, 0.1, 3, 0.1), white));
+  for (let i = 0; i < 4; i++) { const grip = new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.8, 0.05, 2, 0.02), black); grip.position.set(0.55 + i * 0.13, 0, 0.06); cover.add(grip); }
+  touch.add(cover);
+  add("touch", touch, [0, 5.2, 1.6]);
 
   /* electrode strip (slides out sideways when exploded) */
   const strip = new THREE.Group(); strip.position.set(0, 6.95, 0);
@@ -237,6 +257,7 @@ export function buildConceptModel(opts = {}) {
     root, parts, particles,
     setScreen: (s) => { drawScreen(sc, s); scTex.needsUpdate = true; },
     setLeds: (on) => { ["g", "y", "r"].forEach((k) => (leds[k].emissiveIntensity = on === k ? 2.6 : 0.15)); },
+    setTouchCover: (open) => { cover.position.x = open * 2.0; },
   };
 }
 
@@ -318,7 +339,8 @@ const VIEWS = {
   lifted: { pos: [21, 12, 8.5], target: [0, 8.8, 0] },
   wide: { pos: [28.5, 14, 35], target: [0, 3.2, 0] },
   back: { pos: [-20, 7, -26], target: [0, 1, 0] },
-  screen: { pos: [3.4, 4.0, 13.5], target: [0, 2.4, 1.6] },          // close on the display, used for the test result
+  screen: { pos: [3.4, 4.0, 13.5], target: [0, 2.4, 1.6] },
+  pad: { pos: [4.2, 9.0, 13.5], target: [0, 6.3, 1.2] },           // close on the touch pad on the cartridge front          // close on the display, used for the test result
 };
 
 export class DeviceViewer {
@@ -493,7 +515,8 @@ function whenNear(el, build) {
     return build().catch((e) => { console.error(e); fail(el.closest(".stage"), "The 3D view couldn't load. Check your connection and refresh."); });
   };
   if (!("IntersectionObserver" in window)) { run(); return; }
-  const io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); } }, { rootMargin: "900px 0px" });
+  const later = window.__afterCurtain || ((f) => f());      // never compile a scene while the page-change screen is fading
+  const io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) { io.disconnect(); later(run); } }, { rootMargin: "900px 0px" });
   io.observe(el);
   prewarm.push(run);
 }
@@ -502,8 +525,9 @@ function whenNear(el, build) {
 function prewarmIdle() {
   const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
   const next = () => { const run = prewarm.shift(); if (!run) return; idle(async () => { await run(); setTimeout(next, 250); }); };
-  if (document.readyState === "complete") setTimeout(next, 400);
-  else addEventListener("load", () => setTimeout(next, 400), { once: true });
+  const go = () => (window.__afterCurtain || ((f) => f()))(() => setTimeout(next, 400));
+  if (document.readyState === "complete") go();
+  else addEventListener("load", go, { once: true });
 }
 /* fade the finished model in instead of popping it over the "Loading" text */
 function ready(canvas) {
@@ -540,12 +564,14 @@ async function init() {
     viewers.push(v); ready(storyCanvas);
     const steps = [...document.querySelectorAll(".story-step")];
     const bars = [...document.querySelectorAll(".story-progress i")];
+    const cover = (o) => v.model.setTouchCover && v.model.setTouchCover(o);
     const chapters = [
-      () => { v.view("front"); v.setExplode(0); v.setFocus(null); v.model.particles.set(false); v.pivotGoal = -0.35; v.model.setLeds("g"); v.model.setScreen({ title: "READY", line: "blow to begin" }); },
-      () => { v.view("lifted"); v.setExplode({ cartridge: 0.55, strip: 0.55 }); v.setFocus(["cartridge", "strip"]); v.model.particles.set(false); v.pivotGoal = -0.2; v.model.setLeds(null); },
-      () => { v.view("top"); v.setExplode(0); v.setFocus(["cartridge", "strip", "heater"]); v.model.particles.set(true); v.pivotGoal = -0.5; v.model.setLeds("y"); v.model.setScreen({ title: "CAPTURE", line: "keep blowing", vol: 1.2 }); },
-      () => { v.view("wide"); v.setExplode(1); v.setFocus(["esp32", "afe", "pressure", "pcb", "battery"]); v.model.particles.set(false); v.pivotGoal = -0.6; v.model.setLeds("y"); v.model.setScreen({ title: "SWEEP", line: "reading strip", curve: { peak: 1, upto: 0.7 } }); },
-      () => { v.view("front"); v.setExplode(0); v.setFocus(null); v.model.particles.set(false); v.pivotGoal = -0.35; v.model.setLeds("g"); v.model.setScreen({ title: "RESULT", line: "on-device ML", result: "REFERENCE", cls: "normal", curve: { peak: 0.96, upto: 1 } }); },
+      () => { cover(0); v.view("front"); v.setExplode(0); v.setFocus(null); v.model.particles.set(false); v.pivotGoal = -0.35; v.model.setLeds("g"); v.model.setScreen({ title: "READY", line: "blow to begin" }); },
+      () => { cover(0); v.view("lifted"); v.setExplode({ cartridge: 0.55, strip: 0.55 }); v.setFocus(["cartridge", "strip"]); v.model.particles.set(false); v.pivotGoal = -0.2; v.model.setLeds(null); },
+      () => { cover(0); v.view("top"); v.setExplode(0); v.setFocus(["cartridge", "strip"]); v.model.particles.set(true); v.pivotGoal = -0.5; v.model.setLeds("y"); v.model.setScreen({ title: "CAPTURE", line: "keep blowing", vol: 1.2 }); },
+      () => { cover(0); v.view("wide"); v.setExplode(1); v.setFocus(["esp32", "afe", "pressure", "pcb", "battery"]); v.model.particles.set(false); v.pivotGoal = -0.6; v.model.setLeds("y"); v.model.setScreen({ title: "SWEEP", line: "reading strip", curve: { peak: 1, upto: 0.7 } }); },
+      () => { cover(1); v.view("pad"); v.setExplode(0); v.setFocus(["touch", "cartridge"]); v.model.particles.set(false); v.pivotGoal = -0.25; v.model.setLeds("y"); v.model.setScreen({ title: "TOUCH MODE", line: "hold finger 5-10 s" }); },
+      () => { cover(0); v.view("front"); v.setExplode(0); v.setFocus(null); v.model.particles.set(false); v.pivotGoal = -0.35; v.model.setLeds("g"); v.model.setScreen({ title: "RESULT", line: "on-device ML", result: "REFERENCE", cls: "normal", curve: { peak: 0.96, upto: 1 } }); },
     ];
     /* the active chapter is whichever step sits under the middle of the screen */
     let cur = -1;
@@ -656,8 +682,8 @@ function wireExplorer(v) {
   const scr = { state: $("t-state"), data: $("t-data"), res: $("t-result"), canvas: $("t-curve") };
   const samples = {
     reference: { peak: 0.96, vol: 1.7, result: "REFERENCE", cls: "normal", led: "g", text: "REFERENCE PROFILE" },
-    surrogate: { peak: 0.42, vol: 1.8, result: "ABNORMAL", cls: "abnormal", led: "r", text: "ABNORMAL · confirm in lab" },
-    weak: { peak: 0.8, vol: 0.7, result: "INCONCLUSIVE", cls: "inconclusive", led: "y", text: "INCONCLUSIVE · retest" },
+    surrogate: { peak: 0.24, vol: 1.8, result: "ABNORMAL", cls: "abnormal", led: "r", text: "ABNORMAL · confirm in lab" },
+    weak: { peak: 0.94, vol: 0.6, touch: true, result: "REFERENCE", cls: "normal", led: "g", text: "REFERENCE · via touch mode" },
   };
   let sample = "reference", running = false;
   document.querySelectorAll("#sample-seg button").forEach((b) => b.addEventListener("click", () => {
@@ -687,10 +713,10 @@ function wireExplorer(v) {
   $("run-test").addEventListener("click", async () => {
     if (running) return; running = true; $("run-test").disabled = true;
     const s = samples[sample];
-    select(null); slider.value = 0; v.setExplode(0); v.view("side");
+    select(null); slider.value = 0; v.setExplode(0); v.view("side"); v.model.setTouchCover && v.model.setTouchCover(0);
     const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? Math.min(ms, 150) : ms));
     setRes("—"); drawCurve(null);
-    scr.state.textContent = "CARTRIDGE OK"; scr.data.textContent = "lot verified · 37 °C"; v.model.setLeds("g");
+    scr.state.textContent = "CARTRIDGE OK"; scr.data.textContent = "lot verified · baseline 25.0 µA"; v.model.setLeds("g");
     v.model.setScreen({ title: "READY", line: "blow steadily" }); await wait(900);
     v.model.particles.set(true); v.model.setLeds("y");
     for (let i = 0; i <= 30; i++) {
@@ -701,19 +727,29 @@ function wireExplorer(v) {
     }
     v.model.particles.set(false);
     if (s.vol < 1.5) {
-      scr.state.textContent = "RESULT"; scr.data.textContent = "exhaled volume too low";
-      setRes(s.text, s.cls); v.model.setLeds(s.led); v.model.setScreen({ title: "RETEST", line: "breath too short", result: s.result, cls: s.cls });
-      v.view("screen"); running = false; $("run-test").disabled = false; return;
+      /* not enough breath: open the touch pad and read a fingertip instead */
+      scr.state.textContent = "TOUCH MODE"; scr.data.textContent = `${s.vol.toFixed(2)} L < 1.5 L · slide cover open`;
+      v.model.setScreen({ title: "TOUCH MODE", line: "breath too short" }); v.view("pad"); await wait(900);
+      for (let i = 0; i <= 12; i++) { v.model.setTouchCover && v.model.setTouchCover(i / 12); await wait(40); }
+      for (let i = 0; i <= 20; i++) {
+        const held = (i / 20) * 10;
+        scr.data.textContent = `finger held ${held.toFixed(1)} s${held >= 5 ? " ✓" : ""}`;
+        if (i % 4 === 0) v.model.setScreen({ title: "HOLD", line: `finger ${held.toFixed(0)} s` });
+        await wait(90);
+      }
+      scr.state.textContent = "IN GEL"; scr.data.textContent = "sweat drawn into the hydrogel";
+    } else {
+      scr.state.textContent = "IN GEL"; scr.data.textContent = "droplets merged into the hydrogel";
     }
-    scr.state.textContent = "REHYDRATE"; scr.data.textContent = "buffer released · incubating"; v.model.setScreen({ title: "INCUBATE", line: "buffer released" }); await wait(1300);
+    v.model.setScreen({ title: "WAIT", line: "molecules reaching carbon" }); await wait(1300);
     v.view("screen");
     for (let i = 0; i <= 40; i++) {
       const u = i / 40; drawCurve(s.peak, u, s.cls);
-      scr.state.textContent = "SWEEP"; scr.data.textContent = `Δ peak vs reference ${Math.round((s.peak - 1) * 100 * u)}%`;
+      scr.state.textContent = "SWEEP"; scr.data.textContent = `DPV −0.2 → +0.6 V · ${(25 - (1 - s.peak) * 25 * u).toFixed(1)} µA`;
       if (i % 4 === 0) v.model.setScreen({ title: "SWEEP", line: "reading strip", curve: { peak: s.peak, upto: u }, cls: s.cls });
       await wait(55);
     }
-    scr.state.textContent = "RESULT"; scr.data.textContent = `Δ peak vs reference ${Math.round((s.peak - 1) * 100)}% · on-device ML`;
+    scr.state.textContent = "RESULT"; scr.data.textContent = `peak ${(s.peak * 25).toFixed(1)} µA vs 25.0 baseline · on-device ML`;
     setRes(s.text, s.cls); v.model.setLeds(s.led);
     v.model.setScreen({ title: "RESULT", line: "on-device ML", result: s.result, cls: s.cls, curve: { peak: s.peak, upto: 1 } });
     running = false; $("run-test").disabled = false;

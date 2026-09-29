@@ -12,13 +12,15 @@
   <script>
     (function (d) {
       var r = d.documentElement; r.classList.add("js");
+      /* heavy work (3D scenes) waits until the page-change screen has faded away */
+      window.__afterCurtain = function (fn) { if (r.classList.contains("from-curtain")) addEventListener("curtain:done", fn, { once: true }); else fn(); };
       try {
         if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
         if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
       } catch (e) { r.classList.add("intro-seen"); }
       setTimeout(function () {
         if (window.__siteReady) return;
-        r.classList.remove("from-curtain"); r.classList.add("intro-seen");
+        r.classList.remove("from-curtain"); r.classList.add("intro-seen"); dispatchEvent(new Event("curtain:done"));
         d.querySelectorAll(".kinetic, .split-words").forEach(function (e) { e.classList.add("ready"); });
       }, 4500);
     })(document);
@@ -38,7 +40,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=605813">
+  <link rel="stylesheet" href="styles.css?v=678706">
 </head>
 <body>
 <div class="curtain" aria-hidden="true"><svg class="curtain-mark" viewBox="0 -69 521 72" role="img" aria-label="AeroSense"><path d="M19 0L1.4 0L23.8-66L47.4-66L69.8 0L52.2 0L48.5-12.4L22.7-12.4L19 0ZM25.9-23.2L45.3-23.2L36.4-53.4L34.8-53.4L25.9-23.2ZM100.5 1.4L100.5 1.4Q93.9 1.4 88.7-0.4Q83.5-2.1 79.9-5.5Q76.2-8.9 74.3-13.9Q72.4-18.9 72.4-25.4L72.4-25.4Q72.4-31.7 74.3-37Q76.1-42.3 79.6-46.2Q83-50 88.1-52.1Q93.1-54.2 99.4-54.2L99.4-54.2Q105.8-54.2 110.7-52.2Q115.5-50.1 118.7-46.1Q121.8-42.1 123.3-36.4Q124.8-30.6 124.3-23.2L124.3-23.2L87.9-22.9Q88.4-16.8 91.4-13.8L91.4-13.8Q94.9-10.1 100.4-10.1L100.4-10.1Q103.1-10.1 104.9-10.9Q106.7-11.6 107.9-12.8Q109-13.9 109.7-15.3Q110.3-16.7 110.7-18L110.7-18L124.7-15Q123.9-11.3 122.2-8.3Q120.4-5.3 117.5-3.1Q114.5-0.9 110.4 0.3Q106.2 1.4 100.5 1.4ZM88.3-31.3L88.3-31.3L109.6-31.5Q109.6-34 108.8-35.9L108.8-35.9Q107.5-39 105-40.5Q102.5-41.9 99.6-41.9L99.6-41.9Q96.1-41.9 93.5-40Q90.8-38.1 89.3-34.5L89.3-34.5Q88.7-33.1 88.3-31.3ZM148.3 0L132.1 0L132.1-52.8L145.3-52.8L145.6-34.9L147.6-34.9Q148.3-41.9 150.3-46.1Q152.2-50.2 155.9-52.1Q159.5-54 164.9-54L164.9-54Q165.7-54 166.7-54.0Q167.7-53.9 169-53.7L169-53.7L168.4-36.5Q166.8-37.3 165.0-37.6Q163.1-37.8 161.7-37.8L161.7-37.8Q157.8-37.8 155.0-36.3Q152.1-34.8 150.5-31.7Q148.8-28.6 148.3-23.9L148.3-23.9L148.3 0ZM199 1.4L199 1.4Q191 1.4 184.8-1.7Q178.7-4.8 175.2-11Q171.7-17.2 171.7-26.5L171.7-26.5Q171.7-35.8 175.2-42.0Q178.7-48.1 184.9-51.2Q191.1-54.2 199.1-54.2L199.1-54.2Q207.1-54.2 213.3-51.1Q219.5-48 223-41.9Q226.5-35.7 226.5-26.4L226.5-26.4Q226.5-16.9 222.9-10.7Q219.3-4.5 213.1-1.6Q206.8 1.4 199 1.4ZM199.5-10.3L199.5-10.3Q203.1-10.3 205.5-12.0Q207.9-13.6 209.1-17Q210.3-20.4 210.3-25.4L210.3-25.4Q210.3-30.7 209-34.4Q207.7-38 205.2-40.0Q202.6-41.9 198.6-41.9L198.6-41.9Q195.2-41.9 192.8-40.3Q190.3-38.6 189.1-35.2Q187.9-31.8 187.9-26.7L187.9-26.7Q187.9-18.5 190.9-14.4Q194-10.3 199.5-10.3ZM260.8 1.4L260.8 1.4Q254.4 1.4 249.2 0.2Q244-1 240.2-3.5Q236.4-5.9 234.2-9.7Q232-13.5 231.6-18.5L231.6-18.5L245.7-23.2Q246-19 248.1-16.2Q250.2-13.4 253.8-12.1Q257.3-10.7 261.7-10.7L261.7-10.7Q265.9-10.7 268.8-11.8Q271.6-12.8 273.1-14.5Q274.5-16.1 274.5-18L274.5-18Q274.5-20.2 272.6-21.7Q270.7-23.1 267.4-24.2Q264.1-25.2 259.7-26.2L259.7-26.2Q254.7-27.4 249.9-28.8Q245.1-30.2 241.2-32.5Q237.3-34.7 235.0-38.3Q232.8-41.8 232.8-47.2L232.8-47.2Q232.8-53.3 235.9-57.8Q239-62.3 245-64.9Q251-67.4 259.8-67.4L259.8-67.4Q268.5-67.4 274.6-64.9Q280.7-62.4 284-58.0Q287.3-53.5 287.6-47.6L287.6-47.6L273.2-43.5Q273.2-46.4 272.3-48.6Q271.3-50.8 269.6-52.3Q267.9-53.7 265.4-54.5Q262.9-55.2 259.7-55.2L259.7-55.2Q255.9-55.2 253.3-54.3Q250.6-53.4 249.3-52.0Q248-50.5 248-48.6L248-48.6Q248-46.2 250.0-44.7Q252.1-43.1 255.6-42.1Q259.2-41 263.5-40L263.5-40Q267.8-39.1 272.4-37.8Q277-36.4 281-34.2Q285-32 287.4-28.3Q289.9-24.5 289.9-18.8L289.9-18.8Q289.9-12.7 286.6-8.2Q283.4-3.6 276.9-1.1Q270.4 1.4 260.8 1.4ZM322.8 1.4L322.8 1.4Q316.2 1.4 311-0.4Q305.8-2.1 302.1-5.5Q298.5-8.9 296.6-13.9Q294.7-18.9 294.7-25.4L294.7-25.4Q294.7-31.7 296.6-37Q298.4-42.3 301.9-46.2Q305.3-50 310.4-52.1Q315.4-54.2 321.7-54.2L321.7-54.2Q328.1-54.2 332.9-52.2Q337.8-50.1 340.9-46.1Q344.1-42.1 345.6-36.4Q347.1-30.6 346.6-23.2L346.6-23.2L310.2-22.9Q310.7-16.8 313.7-13.8L313.7-13.8Q317.2-10.1 322.7-10.1L322.7-10.1Q325.4-10.1 327.2-10.9Q329-11.6 330.1-12.8Q331.3-13.9 331.9-15.3Q332.6-16.7 333-18L333-18L347-15Q346.2-11.3 344.4-8.3Q342.7-5.3 339.8-3.1Q336.8-0.9 332.6 0.3Q328.5 1.4 322.8 1.4ZM310.6-31.3L310.6-31.3L331.9-31.5Q331.9-34 331.1-35.9L331.1-35.9Q329.8-39 327.3-40.5Q324.8-41.9 321.9-41.9L321.9-41.9Q318.4-41.9 315.8-40Q313.1-38.1 311.6-34.5L311.6-34.5Q311-33.1 310.6-31.3ZM370.5 0L354.4 0L354.4-52.8L367.4-52.8L367.6-37.3L369.6-37.3Q370.9-42.9 373.3-46.7Q375.7-50.5 379.4-52.4Q383.1-54.2 388.1-54.2L388.1-54.2Q397.4-54.2 402.3-47.7Q407.1-41.2 407.1-27L407.1-27L407.1 0L390.9 0L390.9-25.2Q390.9-33.4 388.6-37.1Q386.2-40.9 381.6-40.9L381.6-40.9Q377.8-40.9 375.3-38.6Q372.9-36.3 371.7-32.5Q370.5-28.7 370.5-24L370.5-24L370.5 0ZM438.3 1.4L438.3 1.4Q433 1.4 428.7 0.5Q424.4-0.5 421.2-2.3Q418-4.1 415.9-6.7Q413.9-9.2 413.1-12.3L413.1-12.3L425.1-17.6Q425.8-15.9 427.6-14.2Q429.3-12.4 432.3-11.3Q435.2-10.2 439.4-10.2L439.4-10.2Q443.4-10.2 445.6-11.4Q447.9-12.5 447.9-14.7L447.9-14.7Q447.9-16.3 446.6-17.3Q445.4-18.2 442.9-18.9Q440.4-19.7 436.7-20.4L436.7-20.4Q432.9-21.2 429-22.3Q425.1-23.3 421.7-25.2Q418.3-27 416.3-30.1Q414.2-33.1 414.2-37.8L414.2-37.8Q414.2-42.7 416.8-46.4Q419.4-50 424.6-52.1Q429.7-54.2 437.1-54.2L437.1-54.2Q443.7-54.2 448.7-52.5Q453.7-50.8 457.1-47.7Q460.4-44.5 461.7-40.1L461.7-40.1L448.8-35.5Q448.3-37.7 446.8-39.3Q445.2-40.9 442.9-41.8Q440.5-42.6 437.3-42.6L437.3-42.6Q433.4-42.6 431.3-41.4Q429.1-40.2 429.1-38.2L429.1-38.2Q429.1-36.6 430.6-35.6Q432-34.5 434.7-33.8Q437.4-33.1 441.1-32.3L441.1-32.3Q445-31.5 448.9-30.5Q452.7-29.4 455.9-27.7Q459-25.9 460.9-23.1Q462.7-20.2 462.7-15.7L462.7-15.7Q462.7-10.4 459.9-6.6Q457.1-2.7 451.6-0.7Q446.2 1.4 438.3 1.4ZM494.7 1.4L494.7 1.4Q488.1 1.4 482.9-0.4Q477.7-2.1 474.0-5.5Q470.4-8.9 468.5-13.9Q466.6-18.9 466.6-25.4L466.6-25.4Q466.6-31.7 468.4-37Q470.3-42.3 473.8-46.2Q477.2-50 482.3-52.1Q487.3-54.2 493.6-54.2L493.6-54.2Q500-54.2 504.8-52.2Q509.7-50.1 512.9-46.1Q516-42.1 517.5-36.4Q519-30.6 518.5-23.2L518.5-23.2L482.1-22.9Q482.6-16.8 485.6-13.8L485.6-13.8Q489.1-10.1 494.6-10.1L494.6-10.1Q497.3-10.1 499.1-10.9Q500.9-11.6 502.0-12.8Q503.2-13.9 503.8-15.3Q504.5-16.7 504.9-18L504.9-18L518.9-15Q518.1-11.3 516.4-8.3Q514.6-5.3 511.6-3.1Q508.7-0.9 504.5 0.3Q500.4 1.4 494.7 1.4ZM482.5-31.3L482.5-31.3L503.8-31.5Q503.8-34 503-35.9L503-35.9Q501.7-39 499.2-40.5Q496.7-41.9 493.8-41.9L493.8-41.9Q490.3-41.9 487.6-40Q485-38.1 483.5-34.5L483.5-34.5Q482.9-33.1 482.5-31.3Z"/></svg></div>
@@ -67,9 +69,9 @@
   <div class="wrap">
     <span class="eyebrow">AeroSense · components</span>
     <h1 class="split-words" style="margin-top:20px;max-width:14ch">Every part, and <span class="line2">what it does.</span></h1>
-    <p class="lede" style="margin-top:22px">AeroSense is a handheld reader and a throw-away cartridge. This page walks through each part of the hardware and each layer of the software, from the moment someone blows into the mouthpiece to the result on the screen and the record in the app.</p>
+    <p class="lede" style="margin-top:22px">AeroSense is a handheld reader and a throw-away cartridge. This page walks through each part of the hardware and each layer of the software, from the moment someone blows into the mouthpiece (or presses a fingertip on the pad) to the result on the screen and the record in the app.</p>
     <div class="parts-index">
-      <a href="#hardware"><b>14</b><span>hardware parts</span></a>
+      <a href="#hardware"><b>15</b><span>hardware parts</span></a>
       <a href="#software"><b>4</b><span>software layers</span></a>
       <a href="#ml"><b>RF</b><span>locked classifier</span></a>
       <a href="#app"><b>IoT</b><span>companion app</span></a>
@@ -89,15 +91,16 @@
     <p class="parts-group reveal"><span>A</span>Sampling: the disposable cartridge</p>
     <div class="parts reveal">
       <article class="part"><span class="pn">A1</span><h3>Mouthpiece</h3><span class="role">single-use</span><p>The person blows through it. It bends down into the chamber so the breath goes straight at the nozzle. It's thrown away after each test, so nothing passes between people.</p></article>
-      <article class="part"><span class="pn">A2</span><h3>Micro-impactor nozzle</h3><span class="role">3D-printed</span><p>Narrows and speeds up the breath, then turns it sharply. Gas follows the turn and leaves; the heavier 0.5–5 µm droplets can't turn in time and hit the electrode.</p></article>
-      <article class="part"><span class="pn">A3</span><h3>Screen-printed electrode</h3><span class="role">sensing surface</span><p>A three-electrode strip (working, reference, counter) right under the nozzle. The captured droplets land here and are measured here.</p></article>
-      <article class="part"><span class="pn">A4</span><h3>Buffer blister</h3><span class="role">~30 µL</span><p>A sealed drop of buffer that is released onto the strip after the breath, turning the dried droplets into a liquid sample the electronics can read.</p></article>
+      <article class="part"><span class="pn">A2</span><h3>Venturi nozzle</h3><span class="role">1.2 mm slit</span><p>Speeds the breath into a jet aimed at the gel from 2 mm away, then turns it sharply. Gas follows the turn and leaves; the heavier 0.5–5 µm droplets can't turn in time and land in the gel.</p></article>
+      <article class="part"><span class="pn">A3</span><h3>Screen-printed electrode</h3><span class="role">2 × WE · RE · CE</span><p>Carbon strip with two working electrodes (a control and a sensing one), an Ag/AgCl reference and a carbon counter. The sample is measured right where it lands.</p></article>
+      <article class="part"><span class="pn">A4</span><h3>Pre-cast hydrogel pad</h3><span class="role">agarose + saline + probe</span><p>A thin gel cast onto the strip and sealed in foil: about 1% agarose, 0.9% saline and a ferri/ferrocyanide redox probe. The sample merges straight into it, so no liquid is ever added in the field.</p></article>
+      <article class="part"><span class="pn">A5</span><h3>Touch pad + sliding cover</h3><span class="role">touch mode</span><p>The front of the cartridge exposes the same gel pad behind a sliding cover. If someone can't or won't blow, the cover slides aside and a fingertip rests on the gel for 5–10 seconds.</p></article>
     </div>
 
-    <p class="parts-group reveal"><span>B</span>Conditioning and checks</p>
+    <p class="parts-group reveal"><span>B</span>Sample checks</p>
     <div class="parts reveal">
-      <article class="part"><span class="pn">B1</span><h3>Differential pressure sensor</h3><span class="role">MPXV7002DP</span><p>Measures breath flow and adds it up into exhaled volume. If the breath isn't deep enough to reach the lower airways, no result is given.</p></article>
-      <article class="part"><span class="pn">B2</span><h3>37 °C chamber heater</h3><span class="role">heater film</span><p>Keeps the capture zone at body temperature so breath moisture doesn't condense unevenly and skew the reading.</p></article>
+      <article class="part"><span class="pn">B1</span><h3>Differential pressure sensor</h3><span class="role">MPXV7002DP</span><p>Measures breath flow and adds it up into exhaled volume. Below the 1.5 L gate, no breath result is given and the reader asks for Touch mode.</p></article>
+      <article class="part"><span class="pn">B2</span><h3>Capacitive touch ring</h3><span class="role">ESP32 touch pin</span><p>An electrode ringing the pad. A fingertip changes its capacitance, so the ESP32 knows contact is real and held for the full 5–10 s. Lift early and the result is Inconclusive.</p></article>
     </div>
 
     <p class="parts-group reveal"><span>C</span>Measurement and control</p>
@@ -130,9 +133,9 @@
       <h2 class="split-words">From one breath to one answer.</h2>
     </div>
     <div class="flow good reveal">
-      <div class="step"><h3>Flow check</h3><p>The pressure sensor confirms a deep, steady breath.</p></div>
-      <div class="step"><h3>Impaction</h3><p>Droplets hit the electrode; gas leaves through the vents.</p></div>
-      <div class="step"><h3>Voltammetry</h3><p>The potentiostat sweeps the strip and records a curve.</p></div>
+      <div class="step"><h3>Flow or touch check</h3><p>A deep breath (≥ 1.5 L), or a fingertip held 5–10 s on the pad.</p></div>
+      <div class="step"><h3>Into the gel</h3><p>Droplets or sweat merge into the pre-cast hydrogel on the electrode.</p></div>
+      <div class="step"><h3>Voltammetry</h3><p>A DPV sweep reads the redox probe. Blocked carbon means a lower peak.</p></div>
       <div class="step"><h3>Classify</h3><p>The on-device model reads the curve and shows a result.</p></div>
     </div>
   </div>
@@ -147,10 +150,10 @@
       <p class="lede">Only the last layer needs a network, and the device doesn't need it to give a result.</p>
     </div>
     <div class="layers">
-      <article class="layer reveal"><span class="pn">L1</span><div><h3>Firmware</h3><p>C++ on FreeRTOS. A state machine runs each test: <span class="mono">READY → BLOW → CAPTURE → MEASURE → ANALYSE → RESULT → PURGE</span>. It won't move on until the step before it has passed, such as enough breath volume.</p></div></article>
-      <article class="layer reveal"><span class="pn">L2</span><div><h3>Measurement routines</h3><p>Differential-pulse and square-wave voltammetry (DPV / SWV) sweeps, run by the ESP32 through the potentiostat, with the chamber held at 37 °C.</p></div></article>
-      <article class="layer reveal"><span class="pn">L3</span><div><h3>Signal processing</h3><p>Baseline correction and smoothing, then feature extraction from the cleaned curve: peak position, peak height, area under the peak, peak width and the slope around it.</p></div></article>
-      <article class="layer reveal"><span class="pn">L4</span><div><h3>On-device ML + sync</h3><p>The classifier turns those features into Normal, Abnormal or Inconclusive. When a network is available, the record is sent to the IoT app.</p></div></article>
+      <article class="layer reveal"><span class="pn">L1</span><div><h3>Firmware</h3><p>C++ on FreeRTOS. A state machine runs each test: <span class="mono">READY → BASELINE → BLOW (or TOUCH) → CAPTURE → MEASURE → ANALYSE → RESULT</span>. It won't move on until the step before it has passed, such as enough breath volume or a held touch.</p></div></article>
+      <article class="layer reveal"><span class="pn">L2</span><div><h3>Measurement routines</h3><p>Differential-pulse and square-wave voltammetry (DPV / SWV) sweeps from −0.2 to +0.6 V, run by the ESP32 through the potentiostat. One baseline sweep when the strip goes in, one after the sample.</p></div></article>
+      <article class="layer reveal"><span class="pn">L3</span><div><h3>Signal processing</h3><p>Baseline correction and smoothing, then the control electrode is subtracted (ΔI = I(WE2) − I(WE1)). Features come from the cleaned curve: peak position, peak height, area under the peak, peak width and the slope around it.</p></div></article>
+      <article class="layer reveal"><span class="pn">L4</span><div><h3>On-device ML + sync</h3><p>The classifier turns those features into Reference (≥ 20 µA), Abnormal (≤ 10 µA) or Inconclusive. When a network is available, the record is sent to the IoT app.</p></div></article>
     </div>
   </div>
 </section>
@@ -263,6 +266,6 @@
   </div>
 </footer>
 
-<script src="site.js?v=605813" defer></script>
+<script src="site.js?v=678706" defer></script>
 </body>
 </html>

@@ -82,11 +82,15 @@
   let curtain = d.querySelector(".curtain");
   if (!curtain) { curtain = d.createElement("div"); curtain.className = "curtain"; d.body.appendChild(curtain); }
   const cameByCurtain = root.classList.contains("from-curtain");
+  /* arriving: keep the AeroSense screen up until the fonts and the first layout have settled
+     (and a #section jump has happened underneath), then ease it away. Heavy 3D work waits for
+     "curtain:done" (window.__afterCurtain) so it can't stutter the fade. */
   if (cameByCurtain) {
-    requestAnimationFrame(() => {
-      setTimeout(() => curtain.classList.add("out"), 180);   // hold the AeroSense screen for a beat, then ease it away
-      setTimeout(() => { root.classList.remove("from-curtain"); curtain.classList.remove("out"); }, 750);
-    });
+    const fonts = d.fonts && d.fonts.ready ? Promise.race([d.fonts.ready, new Promise((r) => setTimeout(r, 300))]) : Promise.resolve();
+    fonts.then(() => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+      curtain.classList.add("out");
+      setTimeout(() => { root.classList.remove("from-curtain"); curtain.classList.remove("out"); dispatchEvent(new Event("curtain:done")); }, 820);
+    })), 30));
   }
   /* "/", "/index.html", "/aerosense" and "/aerosense.html" should all count as the same page */
   const pageOf = (p) => p.replace(/index(\.html)?$/, "").replace(/\.html$/, "");
@@ -126,12 +130,13 @@
     const label = "AeroSense";                               // every page change shows the same AeroSense screen
     store.set("nostromo-curtain", "1"); store.set("nostromo-curtain-label", label);
     curtain.classList.remove("out"); curtain.classList.add("in");
-    /* let the screen finish fading in (0.14 s) before the next page takes over; navigating mid-fade
-       made it jump from half to full opacity, the tiny flicker between pages */
+    if (lenis) lenis.stop();                                // freeze the page under the fade
+    /* let the screen finish fading in (0.32 s) before the next page takes over; navigating mid-fade
+       made it jump from half to full opacity, the flicker between pages */
     e.preventDefault();
-    setTimeout(() => { location.href = url.href; }, 150);
+    setTimeout(() => { location.href = url.href; }, 330);
   });
-  addEventListener("pageshow", (e) => { if (e.persisted) curtain.classList.remove("in"); });
+  addEventListener("pageshow", (e) => { if (e.persisted) { curtain.classList.remove("in"); if (lenis) lenis.start(); } });
 
   /* ---------- phone menu ---------- */
   const navEl = d.querySelector(".nav"), menuBtn = d.querySelector(".nav-menu");
@@ -317,6 +322,7 @@
   const topOf = (el) => Math.max(0, Math.round(el.getBoundingClientRect().top + scrollY - navOffset()));
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   let glideMs = 1100;
+  const veil = d.createElement("div"); veil.className = "jump-veil"; veil.setAttribute("aria-hidden", "true"); d.body.appendChild(veil);
   const scrollToEl = (el, smooth) => {
     const y = topOf(el);
     /* one smooth glide whose length grows gently with distance (0.7–1.5 s) */
@@ -337,7 +343,15 @@
     const el = d.getElementById(decodeURIComponent(url.hash.slice(1))); if (!el) return;
     e.preventDefault();
     history.replaceState(null, "", url.hash);
-    scrollToEl(el, !reduce); settleOn(el);
+    const far = Math.abs(topOf(el) - scrollY) > innerHeight * 3.2;
+    if (far && !reduce) {                                   // long jump: dip to dark, jump, rise again
+      veil.classList.add("on");
+      setTimeout(() => {
+        scrollToEl(el, false);
+        requestAnimationFrame(() => requestAnimationFrame(() => { scrollToEl(el, false); veil.classList.remove("on"); }));
+      }, 280);
+      glideMs = 700; settleOn(el);
+    } else { scrollToEl(el, !reduce); settleOn(el); }
     /* replay the heading motion as you land, so every section arrives the same way
        (otherwise a heading can finish animating while it's still gliding into view) */
     if (!reduce) {
@@ -478,7 +492,7 @@
       introHero.style.setProperty("--sin", sIn.toFixed(3));
       introHero.style.setProperty("--sout", sOut.toFixed(3));
       introHero.classList.toggle("show-on", sIn > 0.5 && sOut < 0.5);
-      /* while the AeroSense E-Nose model is on screen, the corner labels and the nav clock step aside */
+      /* while the AeroSense model is on screen, the corner labels and the nav clock step aside */
       root.classList.toggle("showcase-up", pw > 0.4 && prog < 0.995);
     } else if (introWord && !reduce) {
       const p = clamp01(y / (vh * 0.75));

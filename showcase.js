@@ -1,10 +1,10 @@
-/* Scroll showcase on the home page: after NOSTROMO blurs away, "AeroSense E-Nose" and a large
+/* Scroll showcase on the home page: after NOSTROMO blurs away, "AeroSense" and a large
    3D model of the finished reader (one solid piece) come into focus, turn as you scroll,
    then blur away into the rest of the page.
    site.js works out the scroll progress and publishes it as window.__heroProg (0 → 1). */
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildConceptModel } from "./device3d.js?v=601865";
+import { buildConceptModel } from "./device3d.js?v=678706";
 
 const canvas = document.getElementById("showcase3d");
 
@@ -90,4 +90,4 @@ function init() {
   requestAnimationFrame(frame);
 }
 
-try { init(); } catch (e) { console.warn("Showcase unavailable:", e); }
+(window.__afterCurtain || ((f) => f()))(() => { try { init(); } catch (e) { console.warn("Showcase unavailable:", e); } });

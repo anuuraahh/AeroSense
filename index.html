@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Team Nostromo</title>
-  <meta name="description" content="Team Nostromo — student engineers from SKCET building low-cost hardware + ML. Flagship: AeroSense, a handheld breath-aerosol analyser for drug screening (Smart India Hackathon 2026).">
+  <meta name="description" content="Team Nostromo — student engineers from SKCET building low-cost hardware + ML. Flagship: AeroSense, a handheld drug screener that reads breath aerosol or fingertip sweat on one hydrogel cartridge (Smart India Hackathon 2026).">
   <meta property="og:title" content="Team Nostromo">
   <meta property="og:description" content="Low-cost hardware + ML from SKCET. Flagship project: AeroSense breath-aerosol analyser (SIH 2026, PS SIH26230).">
   <meta property="og:image" content="img/prototype-phase2.jpg">
@@ -14,6 +14,8 @@
     /* runs before paint: decides whether to show the intro loader or the page curtain */
     (function (d) {
       var r = d.documentElement; r.classList.add("js");
+      /* heavy work (3D scenes) waits until the page-change screen has faded away */
+      window.__afterCurtain = function (fn) { if (r.classList.contains("from-curtain")) addEventListener("curtain:done", fn, { once: true }); else fn(); };
       try {
         if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
         if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
@@ -21,7 +23,7 @@
       /* failsafe: never leave text hidden if a script fails to load */
       setTimeout(function () {
         if (window.__siteReady) return;
-        r.classList.remove("from-curtain"); r.classList.add("intro-seen");
+        r.classList.remove("from-curtain"); r.classList.add("intro-seen"); dispatchEvent(new Event("curtain:done"));
         d.querySelectorAll(".kinetic, .split-words").forEach(function (e) { e.classList.add("ready"); });
         d.querySelectorAll(".intro").forEach(function (e) { e.classList.add("on"); });
       }, 4500);
@@ -42,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=605813">
+  <link rel="stylesheet" href="styles.css?v=678706">
   <script type="importmap">
   { "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -89,7 +91,7 @@
     <svg class="hud-orbit" viewBox="0 0 440 440"><circle class="ln" cx="0" cy="440" r="330"/><circle class="ln" cx="0" cy="440" r="190"/><circle class="dot" cx="233" cy="207" r="4"/><circle class="dot" cx="306" cy="317" r="3"/><circle class="dot" cx="327" cy="398" r="3"/><path class="ln" d="M150 280 V340 M120 310 H180"/><circle class="dot" cx="150" cy="310" r="3"/><g class="dust"><circle cx="90" cy="431" r="1.2"/><circle cx="91" cy="284" r="1.2"/><circle cx="38" cy="329" r="1.2"/><circle cx="86" cy="373" r="1.0"/><circle cx="161" cy="355" r="0.6"/><circle cx="66" cy="325" r="0.6"/><circle cx="133" cy="302" r="1.2"/><circle cx="104" cy="358" r="0.6"/><circle cx="70" cy="420" r="1.6"/><circle cx="85" cy="356" r="1.2"/><circle cx="124" cy="319" r="0.8"/><circle cx="98" cy="298" r="1.2"/><circle cx="125" cy="342" r="0.6"/><circle cx="152" cy="400" r="1.2"/><circle cx="10" cy="360" r="0.8"/><circle cx="88" cy="387" r="1.6"/><circle cx="109" cy="347" r="1.0"/><circle cx="74" cy="354" r="1.6"/><circle cx="15" cy="394" r="1.0"/><circle cx="104" cy="324" r="0.6"/><circle cx="123" cy="325" r="1.2"/><circle cx="153" cy="344" r="1.2"/><circle cx="78" cy="416" r="1.2"/><circle cx="94" cy="338" r="0.6"/><circle cx="58" cy="373" r="1.0"/><circle cx="85" cy="403" r="1.6"/><circle cx="32" cy="383" r="0.8"/><circle cx="11" cy="411" r="0.8"/></g></svg>
   </div>
   <div class="showcase">
-    <h2 class="showcase-title"><a href="aerosense.html" data-curtain="AeroSense">AeroSense <em>E-Nose</em></a></h2>
+    <h2 class="showcase-title"><a href="aerosense.html" data-curtain="AeroSense">AeroSense</a></h2>
     <canvas id="showcase3d" aria-label="3D model of the AeroSense reader"></canvas>
   </div>
   <div class="wrap intro-word"><h1 class="kinetic mega" data-react>NOSTROMO</h1></div>
@@ -157,10 +159,12 @@
       </div>
       <div>
         <h3 style="font-size:clamp(40px,5.5vw,76px);letter-spacing:-.04em;line-height:.95">AeroSense</h3>
-        <p class="lede" style="margin-top:16px">A handheld reader that catches the droplets in breath on a disposable electrode, reads them with a tiny potentiostat and classifies the result on the device.</p>
+        <p class="lede" style="margin-top:16px">A handheld reader that catches the droplets in breath in a pre-cast hydrogel pad on a disposable electrode, reads them with a tiny potentiostat and classifies the result on the device. If someone won't blow, the same pad reads a fingertip instead.</p>
         <div class="facts">
           <div>Problem statement<b>SIH26230</b></div>
           <div>Status<b>Phase 2 built · sprint next</b></div>
+          <div>Sampling<b>Breath &amp; Touch Mode</b></div>
+          <div>Cartridge<b>One hydrogel pad</b></div>
           <div>Result in<b>&lt; 45 s (target)</b></div>
           <div>Cost per test<b>₹35–50 (projected)</b></div>
         </div>
@@ -199,39 +203,31 @@
          (remove the comment markers). Portrait photos (4:5) look best. -->
     <div class="people">
       <article class="person reveal">
-        <div class="photo"><span>M1</span><!-- <img src="img/team/member1.jpg" alt="Member Name"> --></div>
+        <div class="photo"><img src="img/team/member1.jpg" width="800" height="1000" alt="Hariz Rahman" loading="lazy"></div>
         <div class="who">
-          <h3>Member Name</h3>
-          <div class="dept">Department · Year</div>
-          <div class="role">Team lead · Hardware</div>
-          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+          <h3>Hariz Rahman</h3>
+          <div class="dept">III Year · B.E. EEE</div>
         </div>
       </article>
       <article class="person reveal">
-        <div class="photo"><span>M2</span><!-- <img src="img/team/member2.jpg" alt="Member Name"> --></div>
+        <div class="photo"><img src="img/team/member2.jpg" width="800" height="1000" alt="Rohit R" loading="lazy"></div>
         <div class="who">
-          <h3>Member Name</h3>
-          <div class="dept">Department · Year</div>
-          <div class="role">Firmware · ESP32</div>
-          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+          <h3>Rohit R</h3>
+          <div class="dept">III Year · B.E. EEE</div>
         </div>
       </article>
       <article class="person reveal">
-        <div class="photo"><span>M3</span><!-- <img src="img/team/member3.jpg" alt="Member Name"> --></div>
+        <div class="photo"><img src="img/team/member3.jpg" width="800" height="1000" alt="Jyothi Anu Raagga" loading="lazy"></div>
         <div class="who">
-          <h3>Member Name</h3>
-          <div class="dept">Department · Year</div>
-          <div class="role">Edge ML · Data</div>
-          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+          <h3>Jyothi Anu Raagga</h3>
+          <div class="dept">III Year · B.E. CSE</div>
         </div>
       </article>
       <article class="person reveal">
-        <div class="photo"><span>M4</span><!-- <img src="img/team/member4.jpg" alt="Member Name"> --></div>
+        <div class="photo"><img src="img/team/member4.jpg" width="800" height="1000" alt="Sarveshvar S" loading="lazy"></div>
         <div class="who">
-          <h3>Member Name</h3>
-          <div class="dept">Department · Year</div>
-          <div class="role">Electrochemistry · Sensing</div>
-          <div class="links"><a href="#">LinkedIn</a><a href="#">GitHub</a></div>
+          <h3>Sarveshvar S</h3>
+          <div class="dept">III Year · B.Tech IT</div>
         </div>
       </article>
       <article class="person reveal">
@@ -275,9 +271,9 @@
   </div>
 </footer>
 
-<script src="main.js?v=605813" defer></script>
-<script src="site.js?v=605813" defer></script>
-<script type="module" src="device3d.js?v=601865"></script>
-<script type="module" src="showcase.js?v=601865"></script>
+<script src="main.js?v=678706" defer></script>
+<script src="site.js?v=678706" defer></script>
+<script type="module" src="device3d.js?v=678706"></script>
+<script type="module" src="showcase.js?v=678706"></script>
 </body>
 </html>
