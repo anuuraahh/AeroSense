@@ -486,7 +486,10 @@
       if (introWord) {
         introWord.style.transform = reduce ? "" : `translate3d(0, ${(-pw * 90).toFixed(1)}px, 0) scale(${(1 + pw * 0.1).toFixed(3)})`;
         introWord.style.opacity = (1 - pw).toFixed(3);
-        introWord.style.filter = pw > 0.01 && !reduce ? `blur(${(pw * 6).toFixed(1)}px)` : "";
+        /* blur in whole-pixel steps: re-blurring the giant word on every scroll tick was a big part of the lag */
+        const bl = reduce ? 0 : Math.round(pw * 6);
+        const f = bl ? `blur(${bl}px)` : "";
+        if (introWord.style.filter !== f) introWord.style.filter = f;
       }
       introHero.style.setProperty("--pw", pw.toFixed(3));
       introHero.style.setProperty("--sin", sIn.toFixed(3));

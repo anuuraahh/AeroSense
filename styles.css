@@ -914,10 +914,11 @@ body:has(.intro .moon)::before { display: none; }           /* on the home page 
   background: url("img/moon.webp") right top / contain no-repeat; opacity: 0; transition: opacity .8s ease;
 }
 .moon-ready .intro .moon { opacity: .85; }
-.showcase { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+/* opacity + transform only (both run on the GPU compositor). A CSS blur over the live 3D canvas
+   had to be recomputed every frame and made the scroll into the model stutter. */
+.showcase { position: absolute; inset: 0; z-index: 2; pointer-events: none; will-change: opacity, transform;
   opacity: calc(var(--sin, 0) * (1 - var(--sout, 0)));
-  filter: blur(calc((1 - var(--sin, 0)) * 12px + var(--sout, 0) * 12px));
-  transform: translateY(calc((1 - var(--sin, 0)) * 40px - var(--sout, 0) * 60px)) scale(calc(1 + var(--sout, 0) * .06));
+  transform: translate3d(0, calc((1 - var(--sin, 0)) * 40px - var(--sout, 0) * 60px), 0) scale(calc(0.96 + var(--sin, 0) * .04 + var(--sout, 0) * .06));
 }
 .showcase-title {
   position: absolute; left: 0; right: 0; top: 9%; margin: 0; text-align: center;

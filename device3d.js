@@ -523,7 +523,12 @@ function whenNear(el, build) {
 /* build the remaining 3D views one at a time while the browser is idle, so they're ready before
    anyone scrolls or jumps to them (a jump to #explore no longer has to build a scene on the spot) */
 function prewarmIdle() {
-  const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
+  /* only build while the page is still: compiling a scene mid-scroll is what made scrolling hitch */
+  let lastScroll = 0; addEventListener("scroll", () => (lastScroll = performance.now()), { passive: true });
+  const idle = (fn) => {
+    const wait = () => (performance.now() - lastScroll < 900 ? setTimeout(wait, 400) : ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 4000 }) : setTimeout(fn, 300)));
+    wait();
+  };
   const next = () => { const run = prewarm.shift(); if (!run) return; idle(async () => { await run(); setTimeout(next, 250); }); };
   const go = () => (window.__afterCurtain || ((f) => f()))(() => setTimeout(next, 400));
   if (document.readyState === "complete") go();

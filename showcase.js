@@ -4,7 +4,7 @@
    site.js works out the scroll progress and publishes it as window.__heroProg (0 → 1). */
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildConceptModel } from "./device3d.js?v=680942";
+import { buildConceptModel } from "./device3d.js?v=684809";
 
 const canvas = document.getElementById("showcase3d");
 
@@ -87,6 +87,13 @@ function init() {
     sweep.position.set(Math.sin(time * 0.55) * 16, 10, 12);
     renderer.render(scene, camera);
   };
+  /* compile the shaders up front (quietly, while the page is idle) so the first frame the model
+     appears in doesn't stall the scroll */
+  const warm = () => {
+    const done = () => { try { renderer.render(scene, camera); } catch (e) {} };
+    if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(done, done); else { renderer.compile(scene, camera); done(); }
+  };
+  if ("requestIdleCallback" in window) requestIdleCallback(warm, { timeout: 1500 }); else setTimeout(warm, 300);
   requestAnimationFrame(frame);
 }
 
