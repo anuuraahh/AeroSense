@@ -1221,8 +1221,12 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 .film { margin-top: clamp(48px, 7vw, 96px); }
 .film-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
 .film-head h3 { font-size: clamp(26px, 3.2vw, 40px); letter-spacing: -.03em; line-height: 1; margin-top: 8px; }
-.film-yt { font-family: var(--font-mono); font-size: 13px; color: var(--signal-ink); text-decoration: none; border-bottom: 1px solid var(--signal-dim); padding-bottom: 2px; }
-.film-yt:hover { border-color: var(--signal); }
+.film-yt { display: inline-flex; align-items: center; gap: 12px; padding: 10px 18px 10px 12px; border-radius: 999px; background: #fff; color: #0f0f0f; font-family: var(--font-sans); font-weight: 700; font-size: 15px; letter-spacing: -.005em; text-decoration: none; box-shadow: 0 0 0 5px rgba(255, 0, 51, .12), 0 10px 30px -8px rgba(255, 0, 51, .55); transition: transform .2s, box-shadow .2s; }
+.film-yt svg { width: 34px; height: 24px; flex: none; }
+.film-yt i { font-style: normal; color: #ff0033; transition: transform .2s; }
+.film-yt:hover, .film-yt:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 7px rgba(255, 0, 51, .18), 0 14px 38px -8px rgba(255, 0, 51, .75); }
+.film-yt:hover i { transform: translate(2px, -2px); }
+.film-yt:focus-visible { outline: 2px solid #ff0033; outline-offset: 3px; }
 .film-frame { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); cursor: pointer; box-shadow: var(--shadow-lg); }
 .film-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .85; transition: opacity .3s, transform .6s; }
 .film-frame:hover img { opacity: 1; transform: scale(1.015); }
@@ -1262,3 +1266,5 @@ a.ps-link.ps-hero:hover .ps-hero-go i { transform: translate(2px, -2px); }
 @media (prefers-reduced-motion: reduce) { a.ps-link.ps-hero, a.ps-link.ps-hero::after { animation: none; } }
 @media (max-width: 520px) { .ps-hero-wrap { margin-top: 20px; } .ps-hero-id .ps-long { display: none; } .ps-hero-id::before { content: "PS "; color: var(--signal-ink); margin: 0; } }
 @media (max-width: 360px) { .ps-hero-go .ps-long { display: none; } }
+.ps-desc mark.ps-key { display: inline; padding: 2px 5px; border-radius: 4px; background: linear-gradient(transparent 8%, #fff176 8%, #fff176 92%, transparent 92%); color: #111; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.ps-desc mark.ps-key strong { font-weight: 800; }
