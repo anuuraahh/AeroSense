@@ -1169,8 +1169,17 @@ section.hscroll { padding-block: 0; }
 }
 
 /* SIH26230 links: open the problem statement details */
-a.ps-link { color: var(--signal-ink); border-bottom: 1px solid var(--signal-dim); cursor: pointer; }
-a.ps-link:hover { color: #fff; border-color: var(--signal); }
+/* SIH26230: a periwinkle chip with a live dot, so it reads as "click me" rather than plain text */
+a.ps-link { display: inline-flex; align-items: center; gap: .45em; padding: .14em .62em .14em .52em; margin: 0 .1em; border: 1px solid rgba(142, 155, 255, .6); border-radius: 999px; background: rgba(142, 155, 255, .16); color: #d6dbff; font-family: var(--font-mono); font-weight: 600; letter-spacing: .02em; line-height: 1.25; text-decoration: none; white-space: nowrap; cursor: pointer; pointer-events: auto; box-shadow: 0 0 18px -4px rgba(142, 155, 255, .55); transition: background .2s, color .2s, box-shadow .2s, transform .2s; vertical-align: baseline; }
+a.ps-link::before { content: ""; width: .5em; height: .5em; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 0 rgba(142, 155, 255, .7); animation: ps-ping 2s ease-out infinite; flex: none; }
+a.ps-link::after { content: "details ↗"; font-weight: 500; font-size: .82em; letter-spacing: .06em; text-transform: uppercase; color: var(--signal-ink); opacity: .85; }
+a.ps-link:hover, a.ps-link:focus-visible { background: var(--signal); color: var(--bg); box-shadow: 0 0 0 5px var(--signal-dim), 0 0 30px rgba(142, 155, 255, .5); transform: translateY(-1px); }
+a.ps-link:hover::after, a.ps-link:focus-visible::after { color: var(--bg); opacity: 1; }
+a.ps-link:hover::before, a.ps-link:focus-visible::before { background: var(--bg); animation: none; }
+a.ps-link:focus-visible { outline: none; }
+@keyframes ps-ping { 0% { box-shadow: 0 0 0 0 rgba(142, 155, 255, .75); } 70%, 100% { box-shadow: 0 0 0 .55em rgba(142, 155, 255, 0); } }
+@media (prefers-reduced-motion: reduce) { a.ps-link::before { animation: none; } }
+.feature3d .facts a.ps-link { font-size: 13px; }
 .ps-modal { position: fixed; inset: 0; z-index: 280; display: grid; place-items: center; padding: 20px; background: rgba(5, 6, 12, .72);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s .3s; }
 .ps-modal.on { opacity: 1; visibility: visible; transition: opacity .3s ease; }
@@ -1227,3 +1236,4 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 .film-frame.on { cursor: default; }
 .film-frame.on::after { display: none; }
 @media (max-width: 640px) { .film-play { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .film-play svg { width: 26px; height: 26px; } .film-meta { display: none; } }
+.intro .corner a.ps-link { padding-block: 0; line-height: 1.15; }
