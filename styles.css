@@ -1174,7 +1174,7 @@ a.ps-link:hover { color: #fff; border-color: var(--signal); }
 .ps-modal { position: fixed; inset: 0; z-index: 280; display: grid; place-items: center; padding: 20px; background: rgba(5, 6, 12, .72);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s .3s; }
 .ps-modal.on { opacity: 1; visibility: visible; transition: opacity .3s ease; }
-.ps-box { position: relative; width: min(920px, 100%); max-height: calc(100svh - 40px); overflow: auto; background: var(--bg-2); border: 1px solid var(--line-2);
+.ps-box { position: relative; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; width: min(920px, 100%); max-height: calc(100svh - 40px); overflow: auto; background: var(--bg-2); border: 1px solid var(--line-2);
   border-radius: 18px; padding: 28px clamp(18px, 3vw, 34px) 24px; box-shadow: var(--shadow-lg); transform: translateY(14px) scale(.985); transition: transform .4s cubic-bezier(.2, .7, .2, 1); outline: none; }
 .ps-modal.on .ps-box { transform: none; }
 .ps-box h3 { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); margin: 8px 0 18px; letter-spacing: -.02em; }
@@ -1190,3 +1190,4 @@ a.ps-link:hover { color: #fff; border-color: var(--signal); }
 .ps-desc p { margin: 0 0 8px; } .ps-desc ul { margin: 0 0 8px; padding-left: 20px; }
 .ps-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; font-family: var(--font-mono); font-size: 11.5px; color: var(--dim); }
 @media (max-width: 560px) { .ps-t th { width: auto; display: block; border-right: 0; padding-bottom: 4px; } .ps-t td { display: block; padding-top: 4px; } .ps-t tr { display: block; } }
+html.ps-open, html.ps-open body { overflow: hidden !important; }

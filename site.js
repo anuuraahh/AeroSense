@@ -157,6 +157,7 @@
     if (!psModal) {
       const row = ([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`;
       psModal = d.createElement("div"); psModal.className = "ps-modal";
+      psModal.setAttribute("data-lenis-prevent", "");   // the smooth-scroll engine is paused while it's open: let the popup scroll natively
       psModal.innerHTML = `<div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-h" tabindex="-1">
         <button class="ps-x" type="button" aria-label="Close">×</button>
         <span class="eyebrow">Smart India Hackathon 2026</span>
