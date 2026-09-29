@@ -1242,5 +1242,5 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 @media (max-width: 640px) { .film-play { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .film-play svg { width: 26px; height: 26px; } .film-meta { display: none; } }
 .intro .corner a.ps-link { padding-block: 0; line-height: 1.15; }
 
-.ps-desc mark.ps-key { display: inline; padding: 2px 5px; border-radius: 4px; background: linear-gradient(transparent 8%, #fff176 8%, #fff176 92%, transparent 92%); color: #111; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.ps-desc mark.ps-key { padding: 1px 3px; border-radius: 3px; background: #8e9bff; color: #0a0b12; box-decoration-break: clone; -webkit-box-decoration-break: clone; }   /* same periwinkle as text selection */
 .ps-desc mark.ps-key strong { font-weight: 800; }
