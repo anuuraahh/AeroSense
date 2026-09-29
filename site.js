@@ -178,6 +178,18 @@
     e.preventDefault(); e.stopPropagation(); psOpen(a);
   }, true);
 
+  /* ---------- film: swap the poster for the YouTube player only when asked (keeps the page light) ---------- */
+  d.querySelectorAll(".film-frame[data-yt]").forEach((b) => b.addEventListener("click", () => {
+    if (b.classList.contains("on")) return;
+    const f = d.createElement("iframe");
+    f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1&rel=0&modestbranding=1`;
+    f.title = "AeroSense by Team Nostromo";
+    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    f.allowFullscreen = true;
+    const w = d.createElement("div"); w.className = "film-frame on"; w.appendChild(f);
+    b.replaceWith(w);   // a <div>, not the <button>: an iframe inside a button doesn't take clicks everywhere
+  }));
+
   /* ---------- phone menu ---------- */
   const navEl = d.querySelector(".nav"), menuBtn = d.querySelector(".nav-menu");
   if (navEl && menuBtn) {
