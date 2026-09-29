@@ -138,6 +138,45 @@
   });
   addEventListener("pageshow", (e) => { if (e.persisted) { curtain.classList.remove("in"); if (lenis) lenis.start(); } });
 
+  /* ---------- problem statement SIH26230 ----------
+     The official SIH list has no page per statement (it's a popup inside one long table), so the
+     link opens the same details here, copied from the official listing. */
+  const PS = {
+    rows: [["Problem Statement ID", "26230"], ["Problem Statement Title", "Breath-Based Detection Device for Drug Consumption"]],
+    desc: `<h4>Background</h4><p>Law enforcement agencies currently lack a reliable, portable, non-invasive method to detect recent drug consumption in the field, comparable to a breathalyzer used for alcohol detection. Existing methods (urine or blood testing) are invasive, time-consuming, and unsuitable for rapid field screening. Breath, saliva, and sweat are known to contain biomarkers correlating with recent drug use, but no indigenous, field-ready device presently exists to read them reliably.</p>
+      <h4>Description</h4><p>Participants are to design and build a prototype handheld device capable of detecting the presence of common narcotic substances (such as opioids, cannabis, and synthetic drugs) through breath-sample analysis, using electrochemical or equivalent sensing technology.</p>
+      <p>The device should:</p><ul><li>Provide a rapid, near real-time result at the point of testing.</li><li>Be portable and operable by field personnel with minimal training.</li><li>Indicate a clear positive / negative / inconclusive result.</li><li>Be built using accessible sensor components suitable for a working prototype demonstration.</li></ul>
+      <h4>Expected Deliverables</h4><p>A working hardware prototype capable of demonstrating breath-sample analysis and producing a result, along with a brief technical explanation of the sensing method used and its accuracy on a provided or self-generated test set.</p>
+      <h4>Note to Participants</h4><p>This is a proof-of-concept prototype intended to demonstrate technical feasibility. It is not expected to be a forensically validated or field-certified device at the end of the hackathon.</p>`,
+    more: [["Organization", "Ministry of Home Affairs"], ["Department", "Narcotics Control Bureau"], ["Category", "Hardware"], ["Theme", "MedTech / BioTech / HealthTech"]],
+  };
+  let psModal = null, psLast = null;
+  const psClose = () => { if (!psModal) return; psModal.classList.remove("on"); if (lenis) lenis.start(); d.documentElement.classList.remove("ps-open"); if (psLast) psLast.focus(); };
+  const psOpen = (from) => {
+    psLast = from;
+    if (!psModal) {
+      const row = ([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`;
+      psModal = d.createElement("div"); psModal.className = "ps-modal";
+      psModal.innerHTML = `<div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-h" tabindex="-1">
+        <button class="ps-x" type="button" aria-label="Close">×</button>
+        <span class="eyebrow">Smart India Hackathon 2026</span>
+        <h3 id="ps-h">Problem statement details</h3>
+        <table class="ps-t">${PS.rows.map(row).join("")}<tr><th>Description</th><td><div class="ps-desc" data-lenis-prevent>${PS.desc}</div></td></tr>${PS.more.map(row).join("")}</table>
+        <div class="ps-foot"><span>As published in the SIH 2026 problem statements</span></div>
+      </div>`;
+      d.body.appendChild(psModal);
+      psModal.addEventListener("click", (e) => { if (e.target === psModal || e.target.closest(".ps-x")) psClose(); });
+      d.addEventListener("keydown", (e) => { if (e.key === "Escape" && psModal.classList.contains("on")) psClose(); });
+    }
+    psModal.querySelector(".ps-desc").scrollTop = 0;
+    psModal.classList.add("on"); d.documentElement.classList.add("ps-open"); if (lenis) lenis.stop();
+    psModal.querySelector(".ps-box").focus();
+  };
+  d.addEventListener("click", (e) => {
+    const a = e.target.closest("a.ps-link"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation(); psOpen(a);
+  }, true);
+
   /* ---------- phone menu ---------- */
   const navEl = d.querySelector(".nav"), menuBtn = d.querySelector(".nav-menu");
   if (navEl && menuBtn) {
