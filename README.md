@@ -9,7 +9,7 @@
 
 ---
 
-## The problem (SIH26230)
+## The problem statement (SIH26230)
 
 > **Breath-Based Detection Device for Drug Consumption**
 > Ministry of Home Affairs · Narcotics Control Bureau · Hardware · MedTech / BioTech / HealthTech
