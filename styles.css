@@ -1244,3 +1244,18 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 
 .ps-desc mark.ps-key { padding: 1px 3px; border-radius: 3px; background: #8e9bff; color: #0a0b12; box-decoration-break: clone; -webkit-box-decoration-break: clone; }   /* same periwinkle as text selection */
 .ps-desc mark.ps-key strong { font-weight: 800; }
+
+/* ---------- GitHub: a white pill in the top bar on every page + a card in the work section ---------- */
+.nav-gh { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px 6px 10px; border-radius: 99px; background: #fff; color: #0d1117; font-family: var(--font-sans); font-weight: 700; font-size: 13px; white-space: nowrap; text-decoration: none; box-shadow: 0 0 0 4px rgba(142, 155, 255, .18), 0 6px 20px -6px rgba(142, 155, 255, .7); transition: transform .2s, box-shadow .2s; }
+.nav-gh svg { width: 17px; height: 17px; fill: #0d1117; flex: none; }
+.nav-gh:hover, .nav-gh:focus-visible { transform: translateY(-1px); box-shadow: 0 0 0 6px rgba(142, 155, 255, .28), 0 8px 26px -6px rgba(142, 155, 255, .9); }
+@media (max-width: 420px) { .nav-gh { padding: 7px; } .nav-gh span { display: none; } .nav-gh svg { width: 20px; height: 20px; } }
+.gh-card { display: flex; align-items: center; gap: 16px; margin-top: 18px; padding: 16px 20px; border-radius: var(--radius); background: #fff; color: #0d1117; text-decoration: none; box-shadow: 0 0 0 5px rgba(142, 155, 255, .16), 0 14px 36px -12px rgba(142, 155, 255, .7); transition: transform .2s, box-shadow .2s; max-width: 460px; }
+.gh-card svg { width: 36px; height: 36px; fill: #0d1117; flex: none; }
+.gh-card span { display: grid; gap: 2px; min-width: 0; }
+.gh-card b { font-family: var(--font-sans); font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+.gh-card i { font-style: normal; font-family: var(--font-mono); font-size: 12.5px; color: #57606a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-card em { margin-left: auto; font-style: normal; font-size: 20px; color: #4a55d4; transition: transform .2s; }
+.gh-card:hover, .gh-card:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 7px rgba(142, 155, 255, .26), 0 18px 44px -12px rgba(142, 155, 255, .95); }
+.gh-card:hover em { transform: translate(3px, -3px); }
+@media (max-width: 380px) { .nav-status { display: none; } }
