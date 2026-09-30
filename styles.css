@@ -1275,3 +1275,12 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) { .iot-card b small i { animation: none; } }
 .iot-card b { flex-wrap: wrap; row-gap: 4px; white-space: nowrap; }
 @media (max-width: 420px) { .iot-card b { font-size: 16px; } .iot-card, .gh-card { gap: 13px; padding: 14px 16px; } }
+
+/* ---------- top bar never overlaps: sides keep their size, the links give way ---------- */
+.nav-left, .nav-right { flex: none; }
+.nav-links { min-width: 0; gap: clamp(12px, 1.5vw, 24px); }
+.nav-left { gap: 16px; }
+.nav-home { padding-left: 16px; border-left: 1px solid var(--line-2); }
+@media (min-width: 1px) { .nav-home { display: none; } }                  /* the logo already goes home; phones get Home in the menu */
+@media (max-width: 1240px) { .nav-status { display: none; } }
+@media (max-width: 1080px) and (min-width: 901px) { .nav-gh span { display: none; } .nav-gh { padding: 7px; } .nav-links { gap: 12px; } }
