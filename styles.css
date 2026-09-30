@@ -1259,3 +1259,19 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 .gh-card:hover, .gh-card:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 7px rgba(142, 155, 255, .26), 0 18px 44px -12px rgba(142, 155, 255, .95); }
 .gh-card:hover em { transform: translate(3px, -3px); }
 @media (max-width: 380px) { .nav-status { display: none; } }
+
+/* ---------- IoT dashboard link: periwinkle twin of the GitHub card ---------- */
+.iot-card { display: flex; align-items: center; gap: 16px; margin-top: 14px; padding: 16px 20px; border-radius: var(--radius); background: linear-gradient(120deg, #8e9bff, #b4bdff); color: #0a0b12; text-decoration: none; box-shadow: 0 0 0 5px rgba(142, 155, 255, .18), 0 14px 36px -12px rgba(142, 155, 255, .85); transition: transform .2s, box-shadow .2s; max-width: 460px; }
+.iot-card > svg { width: 36px; height: 36px; flex: none; fill: none; stroke: #0a0b12; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.iot-card > span { display: grid; gap: 2px; min-width: 0; }
+.iot-card b { display: flex; align-items: center; gap: 10px; font-family: var(--font-sans); font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+.iot-card b small { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 99px; background: #0a0b12; color: #3ed598; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.iot-card b small i { width: 7px; height: 7px; border-radius: 50%; background: #3ed598; box-shadow: 0 0 0 0 rgba(62, 213, 152, .7); animation: iot-ping 1.8s ease-out infinite; }
+.iot-card > span > i { font-style: normal; font-family: var(--font-mono); font-size: 12.5px; color: #2a2f5c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iot-card em { margin-left: auto; font-style: normal; font-size: 20px; color: #0a0b12; transition: transform .2s; }
+.iot-card:hover, .iot-card:focus-visible { transform: translateY(-2px); box-shadow: 0 0 0 7px rgba(142, 155, 255, .3), 0 18px 44px -12px rgba(142, 155, 255, 1); }
+.iot-card:hover em { transform: translate(3px, -3px); }
+@keyframes iot-ping { 0% { box-shadow: 0 0 0 0 rgba(62, 213, 152, .7); } 70%, 100% { box-shadow: 0 0 0 7px rgba(62, 213, 152, 0); } }
+@media (prefers-reduced-motion: reduce) { .iot-card b small i { animation: none; } }
+.iot-card b { flex-wrap: wrap; row-gap: 4px; white-space: nowrap; }
+@media (max-width: 420px) { .iot-card b { font-size: 16px; } .iot-card, .gh-card { gap: 13px; padding: 14px 16px; } }

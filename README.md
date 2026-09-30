@@ -5,6 +5,7 @@
 
 **Live site:** https://nostromo-mauve.vercel.app
 **Project video (4 min):** https://youtu.be/PgWyJ9FsXK0
+**Live IoT dashboard:** https://aero-sense-application.vercel.app
 **This repository:** the source of the site above. Its three pages explain the device, show it in 3D, and break down every component.
 
 ---
