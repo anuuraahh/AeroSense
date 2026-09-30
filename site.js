@@ -86,10 +86,13 @@
      (and a #section jump has happened underneath), then ease it away. Heavy 3D work waits for
      "curtain:done" (window.__afterCurtain) so it can't stutter the fade. */
   if (cameByCurtain) {
-    const fonts = d.fonts && d.fonts.ready ? Promise.race([d.fonts.ready, new Promise((r) => setTimeout(r, 300))]) : Promise.resolve();
+    let fonts = d.fonts && d.fonts.ready ? Promise.race([d.fonts.ready, new Promise((r) => setTimeout(r, 300))]) : Promise.resolve();
+    if (root.classList.contains("from-back")) fonts = Promise.race([   // back/forward: wait until the old scroll position is back
+      new Promise((r) => (d.readyState === "complete" ? r() : addEventListener("load", () => setTimeout(r, 60), { once: true }))),
+      new Promise((r) => setTimeout(r, 1600))]);
     fonts.then(() => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
       curtain.classList.add("out");
-      setTimeout(() => { root.classList.remove("from-curtain"); curtain.classList.remove("out"); dispatchEvent(new Event("curtain:done")); }, 820);
+      setTimeout(() => { root.classList.remove("from-curtain", "from-back"); curtain.classList.remove("out"); dispatchEvent(new Event("curtain:done")); }, 640);
     })), 30));
   }
   /* "/", "/index.html", "/aerosense" and "/aerosense.html" should all count as the same page */
@@ -120,6 +123,10 @@
     if (samePage(url)) {
       if (url.hash.length > 1) return;                     // same page + #section: the anchor handler scrolls there
       e.preventDefault();                                   // e.g. the logo on its own page: glide back to the top
+      if (!reduce && scrollY > innerHeight * 3.2) {         // far down: dip to dark, jump, rise again (same as long anchor jumps)
+        const v = d.querySelector(".jump-veil");
+        if (v) { v.classList.add("on"); setTimeout(() => { if (lenis) lenis.scrollTo(0, { immediate: true, force: true }); scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(() => v.classList.remove("on"))); }, 280); return; }
+      }
       if (lenis) lenis.scrollTo(0, { duration: 1 }); else scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
       return;
     }
@@ -416,14 +423,24 @@
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   /* no #section in the address: always open at the very top (some hosts carry the old
      scroll position over when you move between pages) */
-  if (location.hash.length < 2) {
+  const posKey = "nostromo-pos:" + pageOf(location.pathname);
+  addEventListener("pagehide", () => store.set(posKey, String(Math.round(scrollY))));
+  if (location.hash.length < 2 && root.classList.contains("from-back")) {
+    const y = +store.get(posKey) || 0;
+    let touched = false;
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach((ev) => addEventListener(ev, () => (touched = true), { once: true, passive: true }));
+    const toSaved = () => { if (touched) return; if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); scrollTo(0, y); };
+    window.__arriveTop = toSaved;                          // Lenis calls this again when it starts
+    toSaved(); requestAnimationFrame(toSaved);
+    addEventListener("load", () => { sizeH(); toSaved(); setTimeout(toSaved, 30); }, { once: true });
+  } else if (location.hash.length < 2) {
     let touched = false;                                   // never yank someone who has already started scrolling
     ["wheel", "touchstart", "keydown", "pointerdown"].forEach((ev) => addEventListener(ev, () => (touched = true), { once: true, passive: true }));
     const toTop = () => { if (touched) return; if (lenis) lenis.scrollTo(0, { immediate: true, force: true }); scrollTo(0, 0); };
     window.__arriveTop = toTop;                            // Lenis calls this again when it starts
     addEventListener("load", toTop, { once: true });
     toTop(); requestAnimationFrame(toTop);
-    addEventListener("pageshow", (e) => { if (e.persisted) toTop(); });
+    /* (a back/forward return from the browser cache keeps its scroll position as it was) */
   }
   if (location.hash.length > 1) {
     const el = d.getElementById(decodeURIComponent(location.hash.slice(1)));

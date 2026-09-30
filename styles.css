@@ -477,7 +477,7 @@ footer a:hover { color: var(--text); }
 .curtain.in { opacity: 1; visibility: visible; transition: opacity .32s cubic-bezier(.4, 0, .2, 1); }   /* eases in over the old page; the next page is already prefetched */
 /* arriving: covers the first frame, then fades away */
 .js.from-curtain .curtain { opacity: 1; visibility: visible; transition: none; }
-.js.from-curtain .curtain.out, .curtain.out { opacity: 0; visibility: hidden; transition: opacity .72s cubic-bezier(.22, .61, .36, 1) .06s, visibility 0s .8s; }
+.js.from-curtain .curtain.out, .curtain.out { opacity: 0; visibility: hidden; transition: opacity .56s cubic-bezier(.22, .61, .36, 1) .04s, visibility 0s .62s; }
 
 /* ---------- custom cursor (fine pointers only) ---------- */
 .cursor { display: none; }

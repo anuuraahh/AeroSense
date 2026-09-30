@@ -19,6 +19,9 @@
       try {
         if (sessionStorage.getItem("nostromo-intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) r.classList.add("intro-seen");
         if (sessionStorage.getItem("nostromo-curtain")) { r.classList.add("from-curtain"); sessionStorage.removeItem("nostromo-curtain"); }
+        /* back/forward to a page we left mid-scroll: cover it while the old position is restored */
+        var nv = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+        if (nv && nv.type === "back_forward" && location.hash.length < 2 && +sessionStorage.getItem("nostromo-pos:" + location.pathname.replace(/index(\.html)?$/, "").replace(/\.html$/, "")) > 0) r.classList.add("from-curtain", "from-back");
       } catch (e) { r.classList.add("intro-seen"); }
       /* failsafe: never leave text hidden if a script fails to load */
       setTimeout(function () {
@@ -43,7 +46,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=686132">
+  <link rel="stylesheet" href="styles.css?v=686133">
   <script type="importmap">
   { "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -523,8 +526,8 @@
   </div>
 </footer>
 
-<script src="main.js?v=686132" defer></script>
-<script src="site.js?v=686132" defer></script>
+<script src="main.js?v=686133" defer></script>
+<script src="site.js?v=686133" defer></script>
 <script type="module" src="device3d.js?v=686125"></script>
 <script type="module" src="gel3d.js?v=686125"></script>
 </body>
