@@ -1284,3 +1284,85 @@ html.ps-open, html.ps-open body { overflow: hidden !important; }
 @media (min-width: 1px) { .nav-home { display: none; } }                  /* the logo already goes home; phones get Home in the menu */
 @media (max-width: 1240px) { .nav-status { display: none; } }
 @media (max-width: 1080px) and (min-width: 901px) { .nav-gh span { display: none; } .nav-gh { padding: 7px; } .nav-links { gap: 12px; } }
+
+/* ---------- prototype disclaimer ---------- */
+.prototype-disclaimer {
+  background: rgba(240, 179, 74, 0.08);
+  border-bottom: 1px solid rgba(240, 179, 74, 0.22);
+  padding: 10px 0;
+  position: relative;
+  z-index: 45;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.disclaimer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+.disclaimer-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--amber);
+  background: rgba(240, 179, 74, 0.14);
+  border: 1px solid rgba(240, 179, 74, 0.3);
+  padding: 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.disclaimer-tag .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px rgba(240, 179, 74, 0.3);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.disclaimer-text {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 450;
+  line-height: 1.4;
+}
+.disclaimer-badge-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(240, 179, 74, 0.08);
+  border: 1px solid rgba(240, 179, 74, 0.25);
+  color: #fce8c3;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 18px;
+  max-width: 100%;
+}
+.disclaimer-badge-hero .disc-icon {
+  width: 16px;
+  height: 16px;
+  fill: var(--amber);
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .disclaimer-content {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .disclaimer-badge-hero {
+    font-size: 12.5px;
+    padding: 7px 12px;
+  }
+}
+
